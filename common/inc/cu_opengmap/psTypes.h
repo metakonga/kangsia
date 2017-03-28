@@ -1,0 +1,33 @@
+#ifndef PSTYPES_H
+#define PSTYPES_H
+
+#define PI       3.14159265358979323846
+#define IRON_YOUNGS_MODULUS 200E+009
+#define IRON_DENSITY		7870
+#define IRON_POISSON_RATIO	0.28
+
+#define POLYETHYLENE_YOUNGS_MODULUS 0.2E+009
+#define POLYETHYLENE_DENSITY		1768
+#define POLYETHYLENE_POISSON_RATIO	0.46	
+
+#define POLYSTYRENE_YOUNGS_MODULUS 3.25E+009
+#define POLYSTYRENE_DENSITY		   12
+#define POLYSTYRENE_POISSON_RATIO  0.34	
+
+#define GLASS_YOUNG_MODULUS	70E+009
+#define GLASS_DENSITY		2600
+#define GLASS_POISSON_RATIO	0.3
+
+#define ACRYLIC_YOUNG_MODULUS 3.2E+009
+#define ACRYLIC_DENSITY			1185
+#define ACRYLIC_POISSON_RATIO	0.37
+
+template<typename base_type>
+struct cmaterialType
+{
+	base_type density;
+	base_type youngs;
+	base_type poisson;
+};
+
+#endif

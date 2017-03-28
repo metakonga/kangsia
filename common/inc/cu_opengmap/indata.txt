@@ -1,0 +1,23 @@
+nParticle		0
+material		polystyrene
+radius			0.003
+world_origin		0 0 0
+grid_size		128 128 128
+gravity			0 -9.80665 0
+mass			0.0002
+
+simulation_time	1.5
+time_step		0.00001
+
+output_step		0.002
+
+arrange			0.25 0    0.25
+			0.29 0.04 0.29
+
+event			boundary 1	
+				5	0.5	 p	0.0 0.3 0.0	end
+
+				
+
+
+
