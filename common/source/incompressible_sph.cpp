@@ -1280,7 +1280,8 @@ void incompressible_sph::cpuRun()
 		calcFreeSurface(false);
 		size_t ppe_iter_pre = ppe_iter;
 		ppe_iter += solve_the_pressure_poisson_equation_by_Bi_CGSTAB();
-		std::cout << "ppe iteration : " << ppe_iter - ppe_iter_pre << std::endl;
+		if ((ppe_iter - ppe_iter_pre) == ppeIter)
+			std::cout << "over iteration : " << ppe_iter - ppe_iter_pre << std::endl;
 		correct_by_adding_the_pressure_gradient_term();
 		if(particleCountByType[FLOATING])
 			update_floating_body();

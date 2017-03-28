@@ -18,8 +18,8 @@ public:
 		//unsigned int ns = sizeof(float);
 		isph->setDevice(GPU);
 		isph->setDimension(DIM2);
-		isph->setTimeStep(0.1e-3f);
-		isph->setStep(10000);
+		isph->setTimeStep(2.0e-3f);
+		isph->setStep(500);
 		isph->setEndTime(52.0f);
 		isph->setProjectionFrom(NONINCREMENTAL, 1);
 		isph->setPPESolver(250, 1e-2f);

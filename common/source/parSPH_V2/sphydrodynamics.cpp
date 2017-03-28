@@ -1077,7 +1077,7 @@ void sphydrodynamics::exportParticlePosition(size_t pit)
 {
 	float t = pit * dt;
 	char pt[256] = { 0, };
-	sprintf_s(pt, 256, "C:/C++/kangsia/case/parSPH_V2/Lid_driven_cavity_flow/part%f.txt", t);
+	sprintf_s(pt, 256, "C:/C++/kangsia/case/Lid_driven_cavity_flow/part%f.txt", t);
 	std::fstream of;
 	of.open(pt, std::ios::out);
 	for (size_t i = 0; i < np; i++){
