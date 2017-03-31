@@ -13,19 +13,19 @@ public:
 	fluid_detection(sphydrodynamics *_sph);
 	~fluid_detection();
 
-	void setWorldBoundary(VEC3F bMin, VEC3F bMax);
-	void setGridCellSize(float _gcs) { gcSize = _gcs; }
+	void setWorldBoundary(VEC3D bMin, VEC3D bMax);
+	void setGridCellSize(double _gcs) { gcSize = _gcs; }
 
-	float gridCellSize() { return gcSize; }
+	double gridCellSize() { return gcSize; }
 	bool initGrid();
-	VEC3F& gridMin() { return gMin; }
-	VEC3F& gridMax() { return gMax; }
+	VEC3D& gridMin() { return gMin; }
+	VEC3D& gridMax() { return gMax; }
 
 	void sort(bool isf = false);
 	void sort_with_ghost_creating();
 	void ghostProcess(fluid_particle* i, fluid_particle* j);
 	size_t cellHash(VEC3I& cell);
-	VEC3I cellPos(VEC3F& pos);
+	VEC3I cellPos(VEC3D& pos);
 	void forEachSetup(fluid_particle* parI);
 	void forEachNeighbor(fluid_particle* pari, VEC2UI *_hs = NULL);
 	size_t createGhostParticles(size_t i, bool isOnlyCount);
@@ -34,9 +34,9 @@ public:
 private:
 	bool _isf;
 
-	VEC3F gMin;
-	VEC3F gMax;
-	VEC3F gSize;
+	VEC3D gMin;
+	VEC3D gMax;
+	VEC3D gSize;
 	VEC3I cellCount_1;
 	VEC3I cellI;
 	VEC3I cellJ;
@@ -52,8 +52,8 @@ private:
 	size_t *cell_id;
 	size_t *cell_start;
 
-	float gcSize;				// grid cell size
-	float cSize_inv;			// inverse of cell size
+	double gcSize;				// grid cell size
+	double cSize_inv;			// inverse of cell size
 
 	sphydrodynamics *sph;
 };

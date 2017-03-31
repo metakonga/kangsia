@@ -11,6 +11,7 @@ typedef vector2<size_t> VEC2UI;
 typedef vector2<float> VEC2F;
 
 typedef vector3<float> VEC3F;
+typedef vector3<double> VEC3D;
 typedef vector3<int> VEC3I;
 typedef VEC3F* VEC3F_PTR;
 
