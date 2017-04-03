@@ -9,8 +9,8 @@ public:
 	quadraticKernel(sphydrodynamics *_sph);
 	virtual ~quadraticKernel();
 
-	virtual float sphKernel(float QSq);
-	virtual VEC3F sphKernelGrad(float QSq, VEC3F& distVec);
+	virtual double sphKernel(double QSq);
+	virtual VEC3D sphKernelGrad(double QSq, VEC3D& distVec);
 };
 
 #endif

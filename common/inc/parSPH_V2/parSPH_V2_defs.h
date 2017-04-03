@@ -17,34 +17,34 @@ typedef struct
 { 
 	tKernel kernel;
 	bool correction;
-	float h;
-	float h_sq;
-	float h_inv;
-	float h_inv_sq;
-	float h_inv_2;
-	float h_inv_3;
-	float h_inv_4;
-	float h_inv_5;
+	double h;
+	double h_sq;
+	double h_inv;
+	double h_inv_sq;
+	double h_inv_2;
+	double h_inv_3;
+	double h_inv_4;
+	double h_inv_5;
 }smoothing_kernel;
 
 typedef struct
 {
 	bool enable;
 	size_t frequency;
-	float factor;
+	double factor;
 }particle_shift;
 
 typedef struct  
 {
-	VEC3F position;
-	VEC3F normal;
-	VEC3F tangent;
+	VEC3D position;
+	VEC3D normal;
+	VEC3D tangent;
 }corner;
 
 typedef struct  
 {
 	bool _isOverlap;
-	VEC3F normal;
+	VEC3D normal;
 }corner_info;
 
 typedef struct  
@@ -53,7 +53,7 @@ typedef struct
 	bool isMovement;
 	size_t sid;
 	size_t cnt;
-	VEC3F iniVel;
+	VEC3D iniVel;
 	corner c1;
 	corner c2;
 	corner c3;
@@ -62,10 +62,10 @@ typedef struct
 typedef struct {
 	size_t sid;
 	size_t cnt;
-	VEC3F p1;
-	VEC3F p2;
-	VEC3F t1;
-	VEC3F t2;
+	VEC3D p1;
+	VEC3D p2;
+	VEC3D t1;
+	VEC3D t2;
 }overlappingLine;
  
 typedef struct
@@ -74,7 +74,7 @@ typedef struct
 	bool goLeft, goRight;
 }queuedParticle;
 
-typedef struct{ float xx, xy, xz, yy, yz, zz; }symatrix;
-typedef struct{ float s0, s1, s2, s3, s4, s5; }float6;
+typedef struct{ double xx, xy, xz, yy, yz, zz; }symatrix;
+typedef struct{ double s0, s1, s2, s3, s4, s5; }double6;
 
 #endif

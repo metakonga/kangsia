@@ -28,13 +28,13 @@ geometry::~geometry()
 	objCount--;
 }
 
-void geometry::innerDefine(VEC3F& _inner_corner_pos)
+void geometry::innerDefine(VEC3D& _inner_corner_pos)
 {
 	//ninnerPoint = _ninnerPoint;
 	inner_corner_pos.push_back(_inner_corner_pos);
 }
 
-bool geometry::InitParticle(VEC3F& pos, VEC3F& normal, VEC3F& tg, bool onlyCountParticles, bool isCorner, int minusCount, bool isfloting, bool isInner)
+bool geometry::InitParticle(VEC3D& pos, VEC3D& normal, VEC3D& tg, bool onlyCountParticles, bool isCorner, int minusCount, bool isfloting, bool isInner)
 {
 	if (isCorner)
 		if (sph->isCornerOverlapping(pos))
@@ -76,14 +76,14 @@ size_t geometry::nParticle()
 	return pcount;
 }
 
-void geometry::setMovementExpression(float startTime, float endTime, VEC3F iniVel)
+void geometry::setMovementExpression(double startTime, double endTime, VEC3D iniVel)
 {
 	startMovementTime = startTime;
 	endMovementTime = endTime;
 	initVel = iniVel;
 }
 
-void geometry::runExpression(float dt, float time)
+void geometry::runExpression(double dt, double time)
 {
 
 // 	if (time >= 0.0f){
@@ -95,7 +95,7 @@ void geometry::runExpression(float dt, float time)
 // // 				fp->setPositionOld(fp->position());
 // // 			}
 // // 		}
-// 		float sign = 1.f;
+// 		double sign = 1.f;
 // // 		if (time > 0.16f && time < 0.26f)
 // // 			sign = -1.f;
 // // 		else if (time > 0.26f)
@@ -109,16 +109,16 @@ void geometry::runExpression(float dt, float time)
 // 			if (j == 599)
 // 				j = 599;
 // 			fp = sph->particle(sid + j);
-// 			VEC3F upos = fp->positionOld();
-// 			upos.x += 0.5f * 0.005f * sin(12.566371f * (time /*- 0.1f*/) + 0.75 * 12.566371f * 0.5f) + 0.005f * 0.5f;//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (float)M_PI * (time - startMovementTime))) * VEC3F(1.0f, 0.0f, 0.0f); //dt * initVel;
+// 			VEC3D upos = fp->positionOld();
+// 			upos.x += 0.5f * 0.005f * sin(12.566371f * (time /*- 0.1f*/) + 0.75 * 12.566371f * 0.5f) + 0.005f * 0.5f;//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (double)M_PI * (time - startMovementTime))) * VEC3D(1.0f, 0.0f, 0.0f); //dt * initVel;
 // 				//fp->setPosition();
-// 			//VEC3F uvel = abs(0.08f * M_PI * cos(4.0f * M_PI * (time - startMovementTime))) * VEC3F(1.f, 0.f, 0.f);//;*/ sign * initVel;
-// 			VEC3F uvel = VEC3F(0.5f * 0.005f * 12.566371f * cos(12.566371f * (time/* - 0.1f*/) + 0.75 * 12.566371f * 0.5f), 0, 0);
+// 			//VEC3D uvel = abs(0.08f * M_PI * cos(4.0f * M_PI * (time - startMovementTime))) * VEC3D(1.f, 0.f, 0.f);//;*/ sign * initVel;
+// 			VEC3D uvel = VEC3D(0.5f * 0.005f * 12.566371f * cos(12.566371f * (time/* - 0.1f*/) + 0.75 * 12.566371f * 0.5f), 0, 0);
 // 			//(upos - fp->position()) / dt;
 // 			fp->setPosition(upos);
 // 			//if (fp->particleType() == DUMMY){
-// 				//fp->setVelocity(VEC3F(0.f, 0.f, 0.f));
-// 				//fp->setAuxVelocity(VEC3F(0.f, 0.f, 0.f));
+// 				//fp->setVelocity(VEC3D(0.f, 0.f, 0.f));
+// 				//fp->setAuxVelocity(VEC3D(0.f, 0.f, 0.f));
 // 			//}
 // 			//else{
 // 			fp->setVelocity(uvel);
@@ -139,9 +139,9 @@ void geometry::runExpression(float dt, float time)
 // 			fluid_particle* fp = sph->particle(sid);
 // 			for (unsigned int j = 0; j < pcount; j++){
 // 				fp = sph->particle(sid + j);
-// 				VEC3F upos = fp->positionOld();
-// 				upos.x += 0.5f * time;//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (float)M_PI * (time - startMovementTime))) * VEC3F(1.0f, 0.0f, 0.0f); //dt * initVel;
-// 				VEC3F uvel = VEC3F(0.5f, 0.f, 0.f);
+// 				VEC3D upos = fp->positionOld();
+// 				upos.x += 0.5f * time;//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (double)M_PI * (time - startMovementTime))) * VEC3D(1.0f, 0.0f, 0.0f); //dt * initVel;
+// 				VEC3D uvel = VEC3D(0.5f, 0.f, 0.f);
 // 				fp->setPosition(upos);
 // 				fp->setVelocity(uvel);
 // 				fp->setAuxVelocity(uvel);
@@ -152,9 +152,9 @@ void geometry::runExpression(float dt, float time)
 // 			fluid_particle* fp = sph->particle(sid);
 // 			for (unsigned int j = 0; j < pcount; j++){
 // 				fp = sph->particle(sid + j);
-// 				//VEC3F upos = fp->positionOld();
-// 				//upos.x += 0.05f * time;//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (float)M_PI * (time - startMovementTime))) * VEC3F(1.0f, 0.0f, 0.0f); //dt * initVel;
-// 				VEC3F uvel = VEC3F(0.f, 0.f, 0.f);
+// 				//VEC3D upos = fp->positionOld();
+// 				//upos.x += 0.05f * time;//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (double)M_PI * (time - startMovementTime))) * VEC3D(1.0f, 0.0f, 0.0f); //dt * initVel;
+// 				VEC3D uvel = VEC3D(0.f, 0.f, 0.f);
 // 				//fp->setPosition(upos);
 // 				fp->setVelocity(uvel);
 // 				fp->setAuxVelocity(uvel);
@@ -167,11 +167,11 @@ void geometry::runExpression(float dt, float time)
 // 		fluid_particle* fp = sph->particle(sid);
 // 		for (unsigned int j = 0; j < pcount; j++){
 // 			fp = sph->particle(sid + j);
-// // 			VEC3F upos = fp->position() + dt * initVel;// * sin(2 * M_PI * time); //dt * initVel;
+// // 			VEC3D upos = fp->position() + dt * initVel;// * sin(2 * M_PI * time); //dt * initVel;
 // // 			fp->setPosition(upos);
 // // 			fp->setAuxPosition(upos);
-// 			fp->setVelocity(VEC3F(0.f, 0.f, 0.f));
-// 			fp->setAuxVelocity(VEC3F(0.f, 0.f, 0.f));
+// 			fp->setVelocity(VEC3D(0.f, 0.f, 0.f));
+// 			fp->setAuxVelocity(VEC3D(0.f, 0.f, 0.f));
 // 		}
 // 	}
 }
@@ -180,7 +180,7 @@ void geometry::runPeriodic()
 {
 // 	size_t nCreate = 0;
 // 	size_t nDelete = 0;
-// 	VEC3F newPos;
+// 	VEC3D newPos;
 // 	for (size_t i = sid; i < sid + pcount; i++)
 // 	{
 // 		fluid_particle* fp = sph->getPeriodicParticles()->getParticle(i);

@@ -11,17 +11,17 @@ namespace geo
 		line(sphydrodynamics* _sph, tParticle _tp, std::string _nm);
 		virtual ~line();
 
-		void define(VEC3F& start, VEC3F& end, bool normalStartEndLeft, bool considerHP = false, bool isInner = false);
+		void define(VEC3D& start, VEC3D& end, bool normalStartEndLeft, bool considerHP = false, bool isInner = false);
 		virtual std::vector<corner> corners();
 		virtual void initExpression();
 
 	protected:
 		virtual void build(bool onlyCountParticles);
-		virtual bool particleCollision(const VEC3F& position, float radius);
+		virtual bool particleCollision(const VEC3D& position, double radius);
 
-		VEC3F startPoint;
-		VEC3F endPoint;
-		VEC3F normal;
+		VEC3D startPoint;
+		VEC3D endPoint;
+		VEC3D normal;
 	};
 }
 

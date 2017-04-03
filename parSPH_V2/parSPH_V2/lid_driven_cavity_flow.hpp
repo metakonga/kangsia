@@ -11,29 +11,29 @@ public:
 
 	sphydrodynamics* initialize()
 	{
-		std::string basePath = "C:/C++/kangsia/case/parSPH_V2/";
+		std::string basePath = "C:/C++/kangsia/case/";
 		std::string caseName = "lid_driven_cavity_flow";
 
 		incompressible_sph *isph = new incompressible_sph(basePath, caseName);
 		//unsigned int ns = sizeof(float);
 		isph->setDevice(GPU);
 		isph->setDimension(DIM2);
-		isph->setTimeStep(2.0e-3f);
+		isph->setTimeStep(2.0e-3);
 		isph->setStep(500);
-		isph->setEndTime(52.0f);
+		isph->setEndTime(260.0);
 		isph->setProjectionFrom(NONINCREMENTAL, 1);
-		isph->setPPESolver(250, 1e-2f);
-		isph->setKernel(QUADRATIC, false, 0.013f);
+		isph->setPPESolver(250, 1e-2);
+		isph->setKernel(QUADRATIC, false, 0.013);
 		//isph->setPeriodicBoundary(PERI_X, 0.0, 0.2);
 		//isph->setKernel(CUBIC_SPLINE, false, 0.013f);
-		isph->setGravity(0.0f, -9.80665f, 0.0f);
-		isph->setParticleShifting(false, 1, 0.01f);
+		isph->setGravity(0.0, 0.0, 0.0);
+		isph->setParticleShifting(false, 1, 0.01);
 		isph->setDensity(1.0);
-		isph->setViscosity(0.0025f);
+		isph->setViscosity(0.0025);
 		//isph->setFluidFillLocation(0.01f, 0.6f, 0.f);
-		isph->setFluidFillLocation(0.01f, 0.01f, 0.f);
+		isph->setFluidFillLocation(0.01, 0.01, 0.0);
 		//isph->setParticleSpacing(0.01f);
-		isph->setParticleSpacing(0.01f);
+		isph->setParticleSpacing(0.01);
 		//isph->setBoundaryTreatment(GHOST_PARTICLE_METHOD);
 		isph->setBoundaryTreatment(DUMMY_PARTICLE_METHOD);
 		//isph->setCorrection(GRADIENT_CORRECTION);
@@ -47,22 +47,22 @@ public:
 // 		geo::line *fluid_right = new geo::line(isph, FLUID, "fluid right");
 // 		fluid_right->define(VEC3F(0.2f, 0.0f, 0.0f), VEC3F(0.2f, 0.1f, 0.0f), true);
 
-		isph->setInitialVelocity(VEC3F(0.0f, 0.0f, 0.0f));
+		isph->setInitialVelocity(VEC3D(0.0, 0.0, 0.0));
 		//isph->setPeriFluidLimitation(0.2f);
 
 		geo::line *top_wall = new geo::line(isph, BOUNDARY, "top_wall");
-		top_wall->define(VEC3F(1.06f, 1.0f, 0.0f), VEC3F(-0.06f, 1.0f, 0.0f), true);
+		top_wall->define(VEC3D(1.06, 1.0, 0.0), VEC3D(-0.06, 1.0, 0.0), true);
 		//top_wall->setExpressionMovement(true);
-		top_wall->setInitialVelocity(VEC3F(1.0f, 0.0f, 0.0f));
+		top_wall->setInitialVelocity(VEC3D(1.0, 0.0, 0.0));
 
 		geo::line *bottom_wall = new geo::line(isph, BOUNDARY, "bottom_wall");
-		bottom_wall->define(VEC3F(0.0f, 0.0f, 0.0f), VEC3F(1.0f, 0.0f, 0.0f), true);
+		bottom_wall->define(VEC3D(0.0, 0.0, 0.0), VEC3D(1.0, 0.0, 0.0), true);
 
 		geo::line *left_wall = new geo::line(isph, BOUNDARY, "left wall");
-		left_wall->define(VEC3F(0.0f, 0.99f, 0.0f), VEC3F(0.0f, 0.0f, 0.0f), true);
+		left_wall->define(VEC3D(0.0, 0.99, 0.0), VEC3D(0.0, 0.0, 0.0), true);
 
 		geo::line *right_wall = new geo::line(isph, BOUNDARY, "right wall");
-		right_wall->define(VEC3F(1.0f, 0.0f, 0.0f), VEC3F(1.0f, 0.99f, 0.0f), true);
+		right_wall->define(VEC3D(1.0, 0.0, 0.0), VEC3D(1.0, 0.99, 0.0), true);
 
 		if (!isph->initialize())
 			return NULL;
@@ -74,15 +74,15 @@ public:
 		char v;
 		std::fstream pf;
 		pf.open(file, std::ios::in | std::ios::binary);
-		float ps;
+		double ps;
 		bool isf;
-		VEC3F pos, vel;
+		VEC3D pos, vel;
 		for (size_t i = 0; i < sph->nParticle(); i++){
 			fluid_particle* fp = sph->particle(i);
 			pf.read(&v, sizeof(char));
-			pf.read((char*)&pos, sizeof(float) * 3);
-			pf.read((char*)&vel, sizeof(float) * 3);
-			pf.read((char*)&ps, sizeof(float));
+			pf.read((char*)&pos, sizeof(double) * 3);
+			pf.read((char*)&vel, sizeof(double) * 3);
+			pf.read((char*)&ps, sizeof(double));
 			pf.read((char*)&isf, sizeof(bool));
 
 			fp->setPosition(pos);

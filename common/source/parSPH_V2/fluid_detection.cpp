@@ -22,7 +22,7 @@ fluid_detection::~fluid_detection()
 
 }
 
-void fluid_detection::setWorldBoundary(VEC3F bMin, VEC3F bMax)
+void fluid_detection::setWorldBoundary(VEC3D bMin, VEC3D bMax)
 {
 	gMin = bMin;
 	gMax = bMax;
@@ -32,21 +32,21 @@ void fluid_detection::setWorldBoundary(VEC3F bMin, VEC3F bMax)
 bool fluid_detection::initGrid()
 {
 	cells = 0;
-// 	VEC3F fMax = sph->particle(0)->position();
-// 	VEC3F fMin = fMax;
+// 	VEC3D fMax = sph->particle(0)->position();
+// 	VEC3D fMin = fMax;
 // 	if (sph->getPeriodicDirection() == PERI_X)
 // 	{
 // 		for (unsigned int i = 0; i < sph->nParticleByType(FLUID); i++)
 // 		{
-// 			VEC3F p = sph->particle(i)->position();
+// 			VEC3D p = sph->particle(i)->position();
 // 			if (fMax <= p)
 // 				fMax = p;
 // 			if (fMin >= p)
 // 				fMin = p;
 // 		}		
 // 	}
-	gMin = gMin - VEC3F(gcSize);
-	gMax = gMax + VEC3F(gcSize);
+	gMin = gMin - VEC3D(gcSize);
+	gMax = gMax + VEC3D(gcSize);
 	gSize = gMax - gMin;
 
 	gcCount.x = static_cast<int>(ceil(gSize.x / gcSize));
@@ -63,7 +63,7 @@ bool fluid_detection::initGrid()
 	}
 
 	cellCount_1 = gcCount - VEC3I(1);
-	cSize_inv = 1.0f / gcSize;
+	cSize_inv = 1.0 / gcSize;
 
 	size_t np = sph->nParticle();
 	hashes = new VEC2UI[np];
@@ -87,7 +87,7 @@ bool fluid_detection::initGrid()
 	return true;
 }
 
-VEC3I fluid_detection::cellPos(VEC3F& pos)
+VEC3I fluid_detection::cellPos(VEC3D& pos)
 {
 	if (sph->dimension() == DIM2){
 		return VEC3I(
@@ -116,11 +116,11 @@ size_t fluid_detection::cellHash(VEC3I& cell)
 void fluid_detection::ghostProcess(fluid_particle* i, fluid_particle* j)
 {
 	size_t hash = 0;
-	float QSq = 0.f;
-	float df = 0.f;
-	float dg = 0.f;
-	VEC3F j_pos = j->position();
-	VEC3F k_pos, posDif, mp;
+	double QSq = 0.0;
+	double df = 0.0;
+	double dg = 0.0;
+	VEC3D j_pos = j->position();
+	VEC3D k_pos, posDif, mp;
 	VEC3I start = cellPos(j_pos - sph->kernelSupportRadius());
 	VEC3I end = cellPos(j_pos + sph->kernelSupportRadius());
 	if (sph->dimension() == DIM2){
@@ -147,12 +147,12 @@ void fluid_detection::ghostProcess(fluid_particle* i, fluid_particle* j)
 // 						}
 						fluid_particle::ghostParticleInfo ng;
 						ng.baseIdx = particleJ.y;
-						VEC3F lp1 = j_pos - j->tangent();
-						VEC3F lp2 = j_pos + j->tangent();
+						VEC3D lp1 = j_pos - j->tangent();
+						VEC3D lp2 = j_pos + j->tangent();
 // 						if (!j_pos.x && !j_pos.y)
 // 							j_pos.x = 0.f;
 						ng.pos = utils::calcMirrorPosition2Line(lp1, lp2, k_pos, mp);
-						mp = 0.5f * (k_pos + ng.pos);// VEC3F(0.5f*(k_pos.x + ng.pos.x), 0.5f * (k_pos.y + ng.pos.y), 0.f);
+						mp = 0.5 * (k_pos + ng.pos);// VEC3D(0.5f*(k_pos.x + ng.pos.x), 0.5f * (k_pos.y + ng.pos.y), 0.f);
 						ng.df = (k_pos - mp).length();
 						ng.dg = (ng.pos - mp).length();
 						ng.press = k->pressure();
@@ -160,7 +160,7 @@ void fluid_detection::ghostProcess(fluid_particle* i, fluid_particle* j)
 						ng.gradW = sph->kernelFunction()->sphKernelGrad(QSq, posDif);
 						i->Ghosts()->insert(std::pair<size_t, fluid_particle::ghostParticleInfo>(ng.baseIdx, ng));// = ng;
 						//i->Ghosts()->push_back(ng);
-						//r = fpos.y - ng.pos.y;//(ng.auxPosition() - mp).dot(VEC3F(0.f, -1.f, 0.f));
+						//r = fpos.y - ng.pos.y;//(ng.auxPosition() - mp).dot(VEC3D(0.f, -1.f, 0.f));
 						//ng.setPressure(parj->pressure() + sph->density()*sph->gravity().length()*r);
 					}
 				}
@@ -171,7 +171,7 @@ void fluid_detection::ghostProcess(fluid_particle* i, fluid_particle* j)
 
 void fluid_detection::forEachSetup(fluid_particle* parI)
 {
-	VEC3F posI = parI->position();// : parI->auxPosition();
+	VEC3D posI = parI->position();// : parI->auxPosition();
 	cellI = cellPos(posI);
 	if (sph->dimension() == DIM3){
 		loopStart.x = max(cellI.x - 1, 0);
@@ -198,11 +198,11 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 		return;
 	fluid_particle *ps = NULL;
 	size_t hash=0;
-	float QSq;
-	VEC3F posDif;
+	double QSq;
+	VEC3D posDif;
 	VEC2UI *hs = _hs ? _hs : hashes;
-	VEC3F posi = pari->position();// : pari->auxPosition();
-	VEC3F posj;
+	VEC3D posi = pari->position();// : pari->auxPosition();
+	VEC3D posj;
 	bool isperi = false;
 	int dx = 0;
 	//std::cout << pari->ID() << std::endl;
@@ -241,7 +241,7 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 						}
 						posj = parj->position();// : parj->auxPosition();
 // 						if (isperi)
-// 							posDif = -(VEC3F(sph->getPeriodicBoundaryMax(), 0, 0) - VEC3F(sph->getPeriodicBoundaryMin(), 0, 0) - (posi - posj));
+// 							posDif = -(VEC3D(sph->getPeriodicBoundaryMax(), 0, 0) - VEC3D(sph->getPeriodicBoundaryMin(), 0, 0) - (posi - posj));
 // 						else
 						posDif = posi - posj;
 						QSq = posDif.dot() * sph->smoothingKernel().h_inv_sq;
@@ -254,7 +254,7 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 						ni.gradW = sph->kernelFunction()->sphKernelGrad(QSq, posDif);
  						pari->Neighbors()->push_back(ni);
 						if (pari->IsInner()){
-							float dist = posDif.length();
+							double dist = posDif.length();
 							if (abs(dist - sph->particleSpacing()) < 1e-9f){
 								pari->NeighborsInner().push_back(parj->ID());
 							}
@@ -319,7 +319,7 @@ void fluid_detection::resizeDetectionData(size_t pnp, size_t numg)
 void fluid_detection::sort_with_ghost_creating()
 {
 // 	fluid_particle *parI;
-// 	VEC3F pos;
+// 	VEC3D pos;
 // 	for (size_t i = 0; i < sph->nParticle(); i++){
 // 		parI = sph->particle(i);
 // 		pos = parI->position();// : parI->auxPosition();
@@ -335,7 +335,7 @@ void fluid_detection::sort_with_ghost_creating()
 // 		if (hash_start != hashes[i].x){
 // 			hash_start = hashes[i].x;
 // 			if (hash_start > cells){
-// 				VEC3F p = sph->particle(hashes[i].y)->position();
+// 				VEC3D p = sph->particle(hashes[i].y)->position();
 // 				std::cout << ".....error : hash_start is " << hash_start << std::endl;
 // 				std::cout << ".....error position : [ " << p.x << ", " << p.y << ", " << p.z << " ]" << std::endl;
 // 			}
@@ -358,7 +358,7 @@ void fluid_detection::sort(bool isf)
 	size_t rnp = sph->nParticle();
 	if(sph->getPeriodicParticles())
 		rnp += sph->getPeriodicParticles()->nParticle();
-	VEC3F pos;
+	VEC3D pos;
 	VEC3I cpos;
 	for (size_t i = 0; i < rnp; i++){
 		parI = sph->particle(i);
@@ -376,7 +376,7 @@ void fluid_detection::sort(bool isf)
 		if (hash_start != hashes[i].x){
 			hash_start = hashes[i].x;
 			if (hash_start > cells){
-				VEC3F p = sph->particle(hashes[i].y)->position();
+				VEC3D p = sph->particle(hashes[i].y)->position();
 				std::cout << ".....error : hash_start is " << hash_start << std::endl;
 				std::cout << ".....error position : [ " << p.x << ", " << p.y << ", " << p.z << " ]" << std::endl;
 			}
@@ -412,7 +412,7 @@ void fluid_detection::sort(bool isf)
 // 			if (hash_start != _hs[i].x){
 // 				hash_start = _hs[i].x;
 // 				if (hash_start > cells){
-// 					VEC3F p = sph->particle(_hs[i].y)->position();
+// 					VEC3D p = sph->particle(_hs[i].y)->position();
 // 					std::cout << ".....error : hash_start is " << hash_start << std::endl;
 // 					std::cout << ".....error position : [ " << p.x << ", " << p.y << ", " << p.z << " ]" << std::endl;
 // 				}
@@ -437,12 +437,12 @@ void fluid_detection::sort(bool isf)
 size_t fluid_detection::createGhostParticles(size_t i, bool isOnlyCount)
 {
 // 	size_t hash;
-// 	VEC3F posDif;
-// 	VEC3F mp;
-// 	float proj_d;
-// 	float df = 0.f;
-// 	float dg = 0.f;
-// 	float r = 0.f;
+// 	VEC3D posDif;
+// 	VEC3D mp;
+// 	double proj_d;
+// 	double df = 0.f;
+// 	double dg = 0.f;
+// 	double r = 0.f;
 // 	size_t hash2;
  	size_t count = 0;
 // 	fluid_particle *pari = sph->particle(i);
@@ -458,26 +458,26 @@ size_t fluid_detection::createGhostParticles(size_t i, bool isOnlyCount)
 // 							continue;
 // 						
 // 						if (parj->particleType() == FLUID){
-// 							VEC3F fpos = parj->position();
-// 							//VEC3F fvel = _isf ? parj->velocity() : parj->auxVelocity();
+// 							VEC3D fpos = parj->position();
+// 							//VEC3D fvel = _isf ? parj->velocity() : parj->auxVelocity();
 // 							fluid_particle::ghostParticleInfo ng;//fluid_particle ng;
 // 							ng.baseIdx = particleJ.y;
 // 							//ng.setType(GHOST);
 // // 							if (parj->ID() == 0)
 // // 								bool pause = true;
 // 							posDif = pari->position() - fpos;
-// 							float QSq = posDif.dot() * sph->smoothingKernel().h_inv_sq;
+// 							double QSq = posDif.dot() * sph->smoothingKernel().h_inv_sq;
 // 							if (QSq >= sph->kernelFunction()->KernelSupprotSq())
 // 								continue;
-// 							VEC3F lp1 = pari->position() - pari->tangent();
-// 							VEC3F lp2 = pari->position() + pari->tangent();
+// 							VEC3D lp1 = pari->position() - pari->tangent();
+// 							VEC3D lp2 = pari->position() + pari->tangent();
 // 							ng.pos = utils::calcMirrorPosition2Line(lp1, lp2, fpos, mp);
 // 							//ng.setPosition();
 // 							//ng.setAuxPosition(ng.position());
-// 							mp = VEC3F(0.5f*(fpos.x + ng.pos.x), 0.5f * (fpos.y + ng.pos.y), 0.f);
+// 							mp = VEC3D(0.5f*(fpos.x + ng.pos.x), 0.5f * (fpos.y + ng.pos.y), 0.f);
 // 							df = (fpos - mp).length();
 // 							dg = (ng.pos - mp).length();
-// 							r = fpos.y - ng.pos.y;//(ng.auxPosition() - mp).dot(VEC3F(0.f, -1.f, 0.f));
+// 							r = fpos.y - ng.pos.y;//(ng.auxPosition() - mp).dot(VEC3D(0.f, -1.f, 0.f));
 // 							ng.setPressure(parj->pressure() + sph->density()*sph->gravity().length()*r);
 // 							//ng.setDg(dg);
 // 							ng.setAddGhostPressure(sph->density()*sph->gravity().length()*r);

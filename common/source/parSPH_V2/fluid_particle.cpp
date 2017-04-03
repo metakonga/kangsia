@@ -12,42 +12,42 @@ fluid_particle::fluid_particle()
 	, visible(true)
 	, id(0)
 	, p_id(0)
-	, dg(0.f)
-	, cs(0.f)
-	, eddyVisc(0.f)
-	, divP(0.f)
-	, ms(0.f)
-	, rho(0.f)
-	, rho_deriv(0.f)
-	, rho_old(0.f)
-	, rho_temp(0.f)
-	, ps(0.f)
-	, ps_old(0.f)
-	, ps_temp(0.f)
-	, hpressure(0.f)
-	, rhs(0.f)
-	, apress(0.f)
+	, dg(0.0)
+	, cs(0.0)
+	, eddyVisc(0.0)
+	, divP(0.0)
+	, ms(0.0)
+	, rho(0.0)
+	, rho_deriv(0.0)
+	, rho_old(0.0)
+	, rho_temp(0.0)
+	, ps(0.0)
+	, ps_old(0.0)
+	, ps_temp(0.0)
+	, hpressure(0.0)
+	, rhs(0.0)
+	, apress(0.0)
 	, innerCornerParticleID(0)
 	, type(PARTICLE)
 {
 	id = cnt++;
 	neighbors.clear();
 	neighborsInner.clear();
-	sps_tau = { 0.f, };
+	sps_tau = { 0.0, };
 }
 
 fluid_particle::fluid_particle(const fluid_particle& _fp)
-	: rho_deriv(0.f)
-	, rho_old(0.f)
-	, rho_temp(0.f)
-	, ps_old(0.f)
-	, ps_temp(0.f)
-	, hpressure(0.f)
-	, rhs(0.f)
-	, cs(0.f)
-	, eddyVisc(0.f)
-	, divP(0.f)
-	, apress(0.f)
+	: rho_deriv(0.0)
+	, rho_old(0.0)
+	, rho_temp(0.0)
+	, ps_old(0.0)
+	, ps_temp(0.0)
+	, hpressure(0.0)
+	, rhs(0.0)
+	, cs(0.0)
+	, eddyVisc(0.0)
+	, divP(0.0)
+	, apress(0.0)
 	, innerCornerParticleID(0)
 	, type(PARTICLE)
 {
@@ -78,19 +78,19 @@ fluid_particle::fluid_particle(const fluid_particle& _fp)
 	dg = _fp.distanceGhost();
 	neighbors.clear();
 	neighborsInner.clear();
-	//cs = _fpfloat cs;					// sound of speed
-// 	float eddyVisc;
-// 	float divP;
-// 	float ms;					// fluid particle mass
-// 	float rho;					// density
-// 	float rho_deriv;
-// 	float rho_old;
-// 	float rho_temp;
-// 	float ps;					// pressure of fluid
-// 	float ps_old;
-// 	float ps_temp;
-// 	float hpressure;			// hydro pressure
-// 	float dg;
+	//cs = _fpdouble cs;					// sound of speed
+// 	double eddyVisc;
+// 	double divP;
+// 	double ms;					// fluid particle mass
+// 	double rho;					// density
+// 	double rho_deriv;
+// 	double rho_old;
+// 	double rho_temp;
+// 	double ps;					// pressure of fluid
+// 	double ps_old;
+// 	double ps_temp;
+// 	double hpressure;			// hydro pressure
+// 	double dg;
 }
 
 fluid_particle::~fluid_particle()

@@ -20,40 +20,40 @@ namespace geo
 		tGeometry geometryType() { return gtype; }
 		size_t nParticle();
 		void setExpressionMovement(bool b) { isMovement = b; }
-		void setMovementExpression(float startTime, float endTime, VEC3F iniVel);
-		void runExpression(float dt, float time);
+		void setMovementExpression(double startTime, double endTime, VEC3D iniVel);
+		void runExpression(double dt, double time);
 		bool movement() { return isMovement; }
-		VEC3F expressionVelocity() { return initVel; }
-		void innerDefine(VEC3F& _inner_corner_pos);
+		VEC3D expressionVelocity() { return initVel; }
+		void innerDefine(VEC3D& _inner_corner_pos);
 		void setPeriExtrudeCount(size_t n) { periCnt = n; }
-		void setInitialVelocity(VEC3F& _initVel) { initVel = _initVel; }
-		void setPeriodicCondition(PeriodicDirection _periDir, float _periLimit, bool _inflow) { periDir = _periDir; periLimit = _periLimit; inFlow = _inflow; }
+		void setInitialVelocity(VEC3D& _initVel) { initVel = _initVel; }
+		void setPeriodicCondition(PeriodicDirection _periDir, double _periLimit, bool _inflow) { periDir = _periDir; periLimit = _periLimit; inFlow = _inflow; }
 		virtual std::vector<corner> corners() = 0;
 		virtual void initExpression() = 0;
 		void runPeriodic();
 		bool isInFlow() { return inFlow; }
 		PeriodicDirection periDirection() { return periDir; }
-		float periLimitation() { return periLimit; }
-		VEC3F initVelocity() { return initVel; }
+		double periLimitation() { return periLimit; }
+		VEC3D initVelocity() { return initVel; }
 
 	protected:
 		bool inFlow;
 		PeriodicDirection periDir;
-		float periLimit;
+		double periLimit;
 		bool isInner;
 		bool isFirstEx;
 		bool isMovement;
 		size_t ninnerPoint;
-		float startMovementTime;
-		float endMovementTime;
-		VEC3F initVel;
-		std::list<VEC3F> inner_corner_pos;
+		double startMovementTime;
+		double endMovementTime;
+		VEC3D initVel;
+		std::list<VEC3D> inner_corner_pos;
 		friend class sphydrodynamics;
 
 		virtual void build(bool onlyCountParticles) = 0;
-		virtual bool particleCollision(const VEC3F& pos, float radius) = 0;
+		virtual bool particleCollision(const VEC3D& pos, double radius) = 0;
 
-		bool InitParticle(VEC3F& pos, VEC3F& normal, VEC3F& tg, bool onlyCountParticles, bool isCorner, int minusCount, bool isfloting, bool isInner);
+		bool InitParticle(VEC3D& pos, VEC3D& normal, VEC3D& tg, bool onlyCountParticles, bool isCorner, int minusCount, bool isfloting, bool isInner);
 		//virtual void 
 
 		std::string nm;					// geometry name

@@ -15,7 +15,7 @@ public:
 		std::string caseName = "particleFlow";
 
 		incompressible_sph *isph = new incompressible_sph(basePath, caseName);
-		//unsigned int ns = sizeof(float);
+		//unsigned int ns = sizeof(double);
 		isph->setDevice(GPU);
 		isph->setDimension(DIM2);
 		isph->setTimeStep(0.1e-3f);
@@ -39,33 +39,33 @@ public:
 		//isph->setCorrection(GRADIENT_CORRECTION);
 
 		fluid_detection *fd = isph->createFluidDetection();
-		//fd->setWorldBoundary(VEC3F(-0.5f, -0.1f, 0.0f), VEC3F(3.5f, 2.2f, 0.0f));
-		//fd->setWorldBoundary(VEC3F(-0.1f, -0.1f, 0.0f), VEC3F(1.1f, 1.1f, 0.0f));
+		//fd->setWorldBoundary(VEC3D(-0.5f, -0.1f, 0.0f), VEC3D(3.5f, 2.2f, 0.0f));
+		//fd->setWorldBoundary(VEC3D(-0.1f, -0.1f, 0.0f), VEC3D(1.1f, 1.1f, 0.0f));
 		geo::line *fluid_left = new geo::line(isph, FLUID, "fluid left");
-		fluid_left->define(VEC3F(0.0f, 0.0f, 0.0f), VEC3F(0.0f, 0.1f, 0.0f), true);
+		fluid_left->define(VEC3D(0.0f, 0.0f, 0.0f), VEC3D(0.0f, 0.1f, 0.0f), true);
 
 		geo::line *fluid_right = new geo::line(isph, FLUID, "fluid right");
-		fluid_right->define(VEC3F(0.2f, 0.0f, 0.0f), VEC3F(0.2f, 0.1f, 0.0f), true);
+		fluid_right->define(VEC3D(0.2f, 0.0f, 0.0f), VEC3D(0.2f, 0.1f, 0.0f), true);
 
-		isph->setInitialVelocity(VEC3F(1.0f, 0.0f, 0.0f));
+		isph->setInitialVelocity(VEC3D(1.0f, 0.0f, 0.0f));
 		isph->setPeriFluidLimitation(0.2f);
 
 		geo::line *top_wall = new geo::line(isph, BOUNDARY, "top_wall");
-		top_wall->define(VEC3F(0.21f, 0.1f, 0.0f), VEC3F(-0.01f, 0.1f, 0.0f), true);
+		top_wall->define(VEC3D(0.21f, 0.1f, 0.0f), VEC3D(-0.01f, 0.1f, 0.0f), true);
 
 		geo::line *bottom_wall = new geo::line(isph, BOUNDARY, "bottom_wall");
-		bottom_wall->define(VEC3F(-0.01f, 0.f, 0.f), VEC3F(0.21f, 0.f, 0.f), true);
+		bottom_wall->define(VEC3D(-0.01f, 0.f, 0.f), VEC3D(0.21f, 0.f, 0.f), true);
 
  		geo::line *left_peri = new geo::line(isph, PERI_BOUNDARY, "left peri");
-		left_peri->define(VEC3F(-0.01f, 0.0975f, 0.f), VEC3F(-0.01f, 0.0025f, 0.0f), false);
+		left_peri->define(VEC3D(-0.01f, 0.0975f, 0.f), VEC3D(-0.01f, 0.0025f, 0.0f), false);
 		left_peri->setPeriExtrudeCount(5);
-		left_peri->setInitialVelocity(VEC3F(1.0f, 0.0f, 0.0f));
+		left_peri->setInitialVelocity(VEC3D(1.0f, 0.0f, 0.0f));
 		left_peri->setPeriodicCondition(PERI_X, 0.0f, true);
 
 		geo::line *right_peri = new geo::line(isph, PERI_BOUNDARY, "right peri");
-		right_peri->define(VEC3F(0.21f, 0.0025f, 0.f), VEC3F(0.21f, 0.0975f, 0.f), false);
+		right_peri->define(VEC3D(0.21f, 0.0025f, 0.f), VEC3D(0.21f, 0.0975f, 0.f), false);
 		right_peri->setPeriExtrudeCount(5);
-		right_peri->setInitialVelocity(VEC3F(1.0f, 0.0f, 0.0f));
+		right_peri->setInitialVelocity(VEC3D(1.0f, 0.0f, 0.0f));
 		right_peri->setPeriodicCondition(PERI_X, 0.21f, false);
 
 		if (!isph->initialize())
@@ -78,15 +78,15 @@ public:
 		char v;
 		std::fstream pf;
 		pf.open(file, std::ios::in | std::ios::binary);
-		float ps;
+		double ps;
 		bool isf;
-		VEC3F pos, vel;
+		VEC3D pos, vel;
 		for (size_t i = 0; i < sph->nParticle(); i++){
 			fluid_particle* fp = sph->particle(i);
 			pf.read(&v, sizeof(char));
-			pf.read((char*)&pos, sizeof(float) * 3);
-			pf.read((char*)&vel, sizeof(float) * 3);
-			pf.read((char*)&ps, sizeof(float));
+			pf.read((char*)&pos, sizeof(double) * 3);
+			pf.read((char*)&vel, sizeof(double) * 3);
+			pf.read((char*)&ps, sizeof(double));
 			pf.read((char*)&isf, sizeof(bool));
 
 			fp->setPosition(pos);

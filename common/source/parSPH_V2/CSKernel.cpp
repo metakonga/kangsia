@@ -7,12 +7,12 @@ CSKernel::CSKernel(sphydrodynamics *_sph)
 	kernel_support = 2;
 	kernel_support_sq = kernel_support * kernel_support;
 	if (sph->dimension() == DIM3){
-		kernel_const = 1 / ((float)M_PI * sph->smoothingKernel().h_inv_3);
+		kernel_const = 1 / (M_PI * sph->smoothingKernel().h_inv_3);
 	}
 	else{
-		kernel_const = 10.0f / (7.0f * (float)M_PI * sph->smoothingKernel().h_sq);
+		kernel_const = 10.0 / (7.0 * M_PI * sph->smoothingKernel().h_sq);
 	}
-	kernel_grad_const = (-3.0f / 4.0f) * kernel_const * sph->smoothingKernel().h_inv_sq;
+	kernel_grad_const = (-3.0 / 4.0) * kernel_const * sph->smoothingKernel().h_inv_sq;
 }
 
 CSKernel::~CSKernel()
@@ -20,24 +20,24 @@ CSKernel::~CSKernel()
 
 }
 
-float CSKernel::sphKernel(float QSq)
+double CSKernel::sphKernel(double QSq)
 {
-	float Q = sqrt(QSq);
-	if (0 <= Q  && Q <= 1.0f)
-		return kernel_const * (1.f - 1.5f * QSq + 0.75f * QSq * Q);
-	else if (1.0f <= Q && Q <= 2.0f)
-		return kernel_const * 0.25f * pow(2.f - Q, 3.f);
+	double Q = sqrt(QSq);
+	if (0 <= Q  && Q <= 1.0)
+		return kernel_const * (1.0 - 1.5 * QSq + 0.75 * QSq * Q);
+	else if (1.0 <= Q && Q <= 2.0)
+		return kernel_const * 0.25 * pow(2.f - Q, 3.0);
 
 	return 0.0f;
 }
 
-vector3<float> CSKernel::sphKernelGrad(float QSq, VEC3F& distVec)
+vector3<double> CSKernel::sphKernelGrad(double QSq, VEC3D& distVec)
 {
-	float Q = sqrt(QSq);
-	if (Q <= 1.0f)
-		return kernel_grad_const/* * Q*/ * (4.0f - 3.0f * Q) * (distVec /*/ distVec.length()*/);
+	double Q = sqrt(QSq);
+	if (Q <= 1.0)
+		return kernel_grad_const/* * Q*/ * (4.0 - 3.0 * Q) * (distVec /*/ distVec.length()*/);
 	else {
-		float dif = 2.f - Q;
+		double dif = 2.0 - Q;
 		return kernel_grad_const * dif * dif * (distVec / Q/*/ distVec.length()*/);
 	}
 

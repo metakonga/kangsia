@@ -78,9 +78,9 @@ fluid_detection* sphydrodynamics::createFluidDetection()
 	return fd;
 }
 
-bool sphydrodynamics::isCornerOverlapping(const VEC3F& position)
+bool sphydrodynamics::isCornerOverlapping(const VEC3D& position)
 {
-	//corner_info ci = { false, VEC3F(0.f) };
+	//corner_info ci = { false, VEC3D(0.f) };
 	for (size_t i = 0; i < overlappingCorners.size(); i++){
 		if ((overlappingCorners[i].c1.position - position).length() < 1e-9){
 			return true;
@@ -91,32 +91,32 @@ bool sphydrodynamics::isCornerOverlapping(const VEC3F& position)
 	return false;
 }
 
-void sphydrodynamics::setOverlapLine(VEC3F& p1, VEC3F& p2, VEC3F& n1, VEC3F& n2)
+void sphydrodynamics::setOverlapLine(VEC3D& p1, VEC3D& p2, VEC3D& n1, VEC3D& n2)
 {
 	overlappingLine ol = { 0, 0, p1, p2, n1, n2 };
 	overlappingLines.push_back(ol);
 }
 
-size_t sphydrodynamics::initDummies(size_t wallId, VEC3F& pos, VEC3F& initVel, VEC3F& normal, bool onlyCountParticles, bool considerHp, int minusCount, bool isf)
+size_t sphydrodynamics::initDummies(size_t wallId, VEC3D& pos, VEC3D& initVel, VEC3D& normal, bool onlyCountParticles, bool considerHp, int minusCount, bool isf)
 {
 	size_t layers = (size_t)(fd->gridCellSize() / pspace)+1;
 	layers = layers - size_t(minusCount);
 	if (!onlyCountParticles){
 		for (size_t i = 1; i <= layers; i++){
-			float hp = considerHp ? rho * -9.80665f * i * (-pspace) : 0.0f;
+			double hp = considerHp ? rho * -9.80665 * i * (-pspace) : 0.0;
 			initDummyParticle(wallId + i, pos - (i*pspace) * normal, initVel, hp, false, isf, false);
 		}
 	}
 	return layers;
 }
 
-size_t sphydrodynamics::initPeriodic(size_t id, VEC3F& pos, VEC3F& initVel, VEC3F& normal, bool onlyCountParticles, size_t pcnt)
+size_t sphydrodynamics::initPeriodic(size_t id, VEC3D& pos, VEC3D& initVel, VEC3D& normal, bool onlyCountParticles, size_t pcnt)
 {
 	size_t cnt = 0;
 	size_t i = 1;
 	for (; i < pcnt; i++)
 	{
-		VEC3F p = pos - (i * pspace) * normal;
+		VEC3D p = pos - (i * pspace) * normal;
 // 		if (particleCollision(p))
 // 			break;
 		if (!onlyCountParticles)
@@ -128,7 +128,7 @@ size_t sphydrodynamics::initPeriodic(size_t id, VEC3F& pos, VEC3F& initVel, VEC3
 			par->setDensity(rho);
 			par->setIsFloating(false);
 			par->setMass(particleMass[FLUID]);
-			par->setPressure(0.f);
+			par->setPressure(0.0);
 			par->setVelocity(initVel);
 			particleCountByType[PERI_BOUNDARY] += 1;
 		}
@@ -137,7 +137,7 @@ size_t sphydrodynamics::initPeriodic(size_t id, VEC3F& pos, VEC3F& initVel, VEC3
 	return cnt;
 }
 
-void sphydrodynamics::initDummyParticle(size_t id, VEC3F& position, VEC3F& initVel, float hydrop, bool isInner, bool isf, bool isMov)
+void sphydrodynamics::initDummyParticle(size_t id, VEC3D& position, VEC3D& initVel, double hydrop, bool isInner, bool isf, bool isMov)
 {
 	fluid_particle* p = &fp[id];
 	p->setID(id);
@@ -146,7 +146,7 @@ void sphydrodynamics::initDummyParticle(size_t id, VEC3F& position, VEC3F& initV
 	p->setDensity(rho);
 	p->setIsFloating(isf);
 	p->setMass(particleMass[DUMMY]);
-	p->setPressure(0.f);
+	p->setPressure(0.0);
 	p->setHydroPressure(hydrop);
 	p->setVelocity(initVel);
 	p->setAuxVelocity(initVel);
@@ -157,31 +157,31 @@ void sphydrodynamics::initDummyParticle(size_t id, VEC3F& position, VEC3F& initV
 
 void sphydrodynamics::clearMatKgc()
 {
-	memset(matKgc, 0, sizeof(float6) * np);
-// 	const float6 zero_mat = { 0, 0, 0, 0, 0, 0 };
+	memset(matKgc, 0, sizeof(double6) * np);
+// 	const double6 zero_mat = { 0, 0, 0, 0, 0, 0 };
 // 	for (size_t i = 0; i < np; i++){
 // 		//if (fp[i].particleType() == FLUID)
 // 		matKgc[i] = zero_mat;
 // 	}
 }
 
-bool sphydrodynamics::particleCollision(VEC3F& position, bool isfirst)
+bool sphydrodynamics::particleCollision(VEC3D& position, bool isfirst)
 {
 // 	if (position.x > fd->gridMax().x || position.y > fd->gridMax().y)
 // 		return true;
 // 	if (position.x < fd->gridMin().x || position.y < fd->gridMin().y)
 // 		return true;
 
-	float radius = 0.f;// pspace * 0.255f;
+	double radius = 0.0;// pspace * 0.255f;
 	//if (isfirst)
 		//radius = pspace * 0.255f;
 	for (std::multimap<std::string, geo::geometry*>::iterator it = models.begin(); it != models.end(); it++){
 		if (it->second->particleType() == PERI_BOUNDARY)
 			continue;
 		if (it->second->particleType() == BOUNDARY)
-			radius = pspace * 0.255f;
+			radius = pspace * 0.255;
 		else
-			radius = pspace * 0.51f;
+			radius = pspace * 0.51;
 		if (it->second->particleCollision(position, radius))
 			return true;
 	}
@@ -190,7 +190,7 @@ bool sphydrodynamics::particleCollision(VEC3F& position, bool isfirst)
 	return false;
 }
 
-void sphydrodynamics::initFluidParticle(size_t id, VEC3F& position)
+void sphydrodynamics::initFluidParticle(size_t id, VEC3D& position)
 {
 	fluid_particle* p = &fp[id];
 	p->setID(id);
@@ -198,11 +198,11 @@ void sphydrodynamics::initFluidParticle(size_t id, VEC3F& position)
 	p->setPosition(position);
 	p->setDensity(rho);
 	p->setMass(particleMass[FLUID]);
-	p->setPressure(0.f);
+	p->setPressure(0.0);
 	p->setVelocity(initVel);
 }
 
-size_t sphydrodynamics::makeFluid(VEC3F& source, bool onlyCountParticles)
+size_t sphydrodynamics::makeFluid(VEC3D& source, bool onlyCountParticles)
 {
 // 	if (tdim == DIM3){
 // 		for (size_t x = 0; x < )
@@ -223,37 +223,37 @@ size_t sphydrodynamics::makeFluid(VEC3F& source, bool onlyCountParticles)
 		if (!createdLocations.count(hash))
 		{
 			if (!onlyCountParticles)
-				initFluidParticle(createdLocations.size(), source + pspace * VEC3F((float)q.xMin, (float)q.y, tdim == DIM3 ? float(q.z) : 0.0f));
+				initFluidParticle(createdLocations.size(), source + pspace * VEC3D((double)q.xMin, (double)q.y, tdim == DIM3 ? double(q.z) : 0.0));
 			createdLocations.insert(hash);
 
-			if (!particleCollision(source + pspace * VEC3F((float)(q.xMin + 1), (float)q.y, tdim == DIM3 ? float(q.z) : 0.0f)))
+			if (!particleCollision(source + pspace * VEC3D((double)(q.xMin + 1), (double)q.y, tdim == DIM3 ? double(q.z) : 0.0)))
 			{
 				queuedParticle w = { q.xMin + 1, 0, q.y, 0, true, true };
 				analyzeQueue.push(w);
 			}
-			if (!particleCollision(source + pspace *  VEC3F((float)(q.xMin - 1), (float)q.y, tdim == DIM3 ? float(q.z) : 0.0f)))
+			if (!particleCollision(source + pspace *  VEC3D((double)(q.xMin - 1), (double)q.y, tdim == DIM3 ? double(q.z) : 0.0)))
 			{
 				queuedParticle w = { q.xMin - 1, 0, q.y, 0, true, true };
 				analyzeQueue.push(w);
 			}
-			if (!particleCollision(source + pspace *  VEC3F((float)q.xMin, (float)(q.y + 1), tdim == DIM3 ? float(q.z) : 0.0f)))
+			if (!particleCollision(source + pspace *  VEC3D((double)q.xMin, (double)(q.y + 1), tdim == DIM3 ? double(q.z) : 0.0)))
 			{
 				queuedParticle w = { q.xMin, 0, q.y + 1, 0, true, true };
 				analyzeQueue.push(w);
 			}
-			if (!particleCollision(source + pspace *  VEC3F((float)q.xMin, (float)(q.y - 1), tdim == DIM3 ? float(q.z) : 0.0f)))
+			if (!particleCollision(source + pspace *  VEC3D((double)q.xMin, (double)(q.y - 1), tdim == DIM3 ? double(q.z) : 0.0)))
 			{
 				queuedParticle w = { q.xMin, 0, q.y - 1, 0, true, true };
 				analyzeQueue.push(w);
 			}
 			if (tdim == DIM3)
 			{
-				if (!particleCollision(source + pspace * VEC3F((float)(q.xMin), (float)q.y, tdim == DIM3 ? float(q.z + 1) : 0.0f)))
+				if (!particleCollision(source + pspace * VEC3D((double)(q.xMin), (double)q.y, tdim == DIM3 ? double(q.z + 1) : 0.0)))
 				{
 					queuedParticle w = { q.xMin, 0, q.y, q.z + 1, 0, true, true };
 					analyzeQueue.push(w);
 				}
-				if (!particleCollision(source + pspace * VEC3F((float)(q.xMin), (float)q.y, tdim == DIM3 ? float(q.z - 1) : 0.0f)))
+				if (!particleCollision(source + pspace * VEC3D((double)(q.xMin), (double)q.y, tdim == DIM3 ? double(q.z - 1) : 0.0)))
 				{
 					queuedParticle w = { q.xMin, 0, q.y, q.z -1, 0, true, true };
 					analyzeQueue.push(w);
@@ -265,24 +265,24 @@ size_t sphydrodynamics::makeFluid(VEC3F& source, bool onlyCountParticles)
 	return createdLocations.size();
 }
 
-size_t sphydrodynamics::initDummyCorner(size_t wallId, const VEC3F& pos, VEC3F& vel, const VEC3F& n1, const VEC3F& n2, bool onlyCountParticles, bool isInner, bool isMov)
+size_t sphydrodynamics::initDummyCorner(size_t wallId, const VEC3D& pos, VEC3D& vel, const VEC3D& n1, const VEC3D& n2, bool onlyCountParticles, bool isInner, bool isMov)
 {
 	size_t count = 0;
 	int layers = (int)(fd->gridCellSize() / pspace) + 1;
 
 	for (int i = 1; i <= layers; i++){
 
-		float hp = rho * -9.80665f * i * (-pspace);
-		VEC3F p1 = pos - (i * pspace) * n1;
-		VEC3F p2 = pos - (i * pspace) * n2;
+		double hp = rho * -9.80665 * i * (-pspace);
+		VEC3D p1 = pos - (i * pspace) * n1;
+		VEC3D p2 = pos - (i * pspace) * n2;
 
 		count += 1;
 		if (!onlyCountParticles){
-			float dist1 = (p1 - pos).length();
-			float dist2 = (p2 - pos).length();
-			VEC3F norm1 = (p1 - pos) / dist1;
-			VEC3F norm2 = (p2 - pos) / dist2;
-			VEC3F p0 = (dist1 * norm1) + (dist2 * norm2) + pos;
+			double dist1 = (p1 - pos).length();
+			double dist2 = (p2 - pos).length();
+			VEC3D norm1 = (p1 - pos) / dist1;
+			VEC3D norm2 = (p2 - pos) / dist2;
+			VEC3D p0 = (dist1 * norm1) + (dist2 * norm2) + pos;
 			initDummyParticle(wallId + count, p0, vel, hp, isInner, isInner, isMov);
 		}
 
@@ -292,22 +292,22 @@ size_t sphydrodynamics::initDummyCorner(size_t wallId, const VEC3F& pos, VEC3F& 
 		count += 2;
 		if (!onlyCountParticles)
 		{
-			hp = rho * -9.80665f * (p1.y - pos.y);
-			initDummyParticle(wallId + count - 1, p1, vel, abs(hp) < 1e-9f ? 0.0f : hp, false, false, isMov);
-			hp = rho * -9.80665f * (p2.y - pos.y);
-			initDummyParticle(wallId + count, p2, vel, abs(hp) < 1e-9f ? 0.0f : hp, false, false, isMov);
+			hp = rho * -9.80665 * (p1.y - pos.y);
+			initDummyParticle(wallId + count - 1, p1, vel, abs(hp) < 1e-9 ? 0.0 : hp, false, false, isMov);
+			hp = rho * -9.80665 * (p2.y - pos.y);
+			initDummyParticle(wallId + count, p2, vel, abs(hp) < 1e-9 ? 0.0 : hp, false, false, isMov);
 		}
 
 		if (i > 1){
 			for (int j = 1; j < i; j++){
 				count += 2;
-				VEC3F p3 = p1 - (j * pspace) * n2;
-				VEC3F p4 = p2 - (j * pspace) * n1;
+				VEC3D p3 = p1 - (j * pspace) * n2;
+				VEC3D p4 = p2 - (j * pspace) * n1;
 				if (!onlyCountParticles){
-					hp = rho * -9.80665f * (p3.y - pos.y);
-					initDummyParticle(wallId + count - 1, p3, vel, abs(hp) < 1e-9f ? 0.0f : hp, false, false, isMov);
-					hp = rho * -9.80665f * (p4.y - pos.y);
-					initDummyParticle(wallId + count, p4, vel, abs(hp) < 1e-9f ? 0.0f : hp, false, false, isMov);
+					hp = rho * -9.80665 * (p3.y - pos.y);
+					initDummyParticle(wallId + count - 1, p3, vel, abs(hp) < 1e-9 ? 0.0 : hp, false, false, isMov);
+					hp = rho * -9.80665 * (p4.y - pos.y);
+					initDummyParticle(wallId + count, p4, vel, abs(hp) < 1e-9 ? 0.0 : hp, false, false, isMov);
 				}
 			}
 		}
@@ -321,7 +321,7 @@ void sphydrodynamics::runPeriodicBoundary()
 	size_t nin = 0;
 	size_t nout = 0;
 	size_t ndelete = 0;
-	VEC3F newPos;
+	VEC3D newPos;
 	for (size_t i = 0; i < particleCountByType[FLUID]; i++)
 	{
 		if (fp[i].position().x > periFluidLimit)
@@ -332,7 +332,7 @@ void sphydrodynamics::runPeriodicBoundary()
 	}
 	geo::geometry *inGeo = NULL;
 	geo::geometry *outGeo = NULL;
-	float dx = dt * 1.0f;
+	double dx = dt * 1.0;
 	for (std::multimap<std::string, geo::geometry*>::iterator it = models.begin(); it != models.end(); it++){
 		geo::geometry* g = it->second;
 		if (g->particleType() == PERI_BOUNDARY)
@@ -400,7 +400,7 @@ void sphydrodynamics::runPeriodicBoundary()
 	}
 	for (size_t i = 0; i < 39; i++)
 	{
-		new_fp[cnt].setPosition(VEC3F(-0.01f - dx, 0.0975f - i * 0.0025, 0.f));
+		new_fp[cnt].setPosition(VEC3D(-0.01 - dx, 0.0975 - i * 0.0025, 0.0));
 		new_fp[cnt].setPressure(0.f);
 		new_fp[cnt++].setType(PERI_BOUNDARY);
 	}
@@ -420,24 +420,24 @@ void sphydrodynamics::runPeriodicBoundary()
 	size_t new_peri_np = inGeo->pcount + outGeo->pcount;
 	peri->setNumParticle(new_peri_np);
 }
-// size_t sphydrodynamics::initDummyCorner3(size_t wallId, const VEC3F& pos, const VEC3F& n1, const VEC3F& n2, const VEC3F& n3, bool onlyCountParticles, bool isInner, bool isMov)
+// size_t sphydrodynamics::initDummyCorner3(size_t wallId, const VEC3D& pos, const VEC3D& n1, const VEC3D& n2, const VEC3D& n3, bool onlyCountParticles, bool isInner, bool isMov)
 // {
 // 	size_t count = 0;
 // 	int layers = (int)(fd->gridCellSize() / pspace);
 // 
 // 	for (int i = 1; i <= layers; i++){
 // 
-// 		float hp = rho * -9.80665f * i * (-pspace);
-// 		VEC3F p1 = pos - (i * pspace) * n1;
-// 		VEC3F p2 = pos - (i * pspace) * n2;
+// 		double hp = rho * -9.80665f * i * (-pspace);
+// 		VEC3D p1 = pos - (i * pspace) * n1;
+// 		VEC3D p2 = pos - (i * pspace) * n2;
 // 
 // 		count += 1;
 // 		if (!onlyCountParticles){
-// 			float dist1 = (p1 - pos).length();
-// 			float dist2 = (p2 - pos).length();
-// 			VEC3F norm1 = (p1 - pos) / dist1;
-// 			VEC3F norm2 = (p2 - pos) / dist2;
-// 			VEC3F p0 = (dist1 * norm1) + (dist2 * norm2) + pos;
+// 			double dist1 = (p1 - pos).length();
+// 			double dist2 = (p2 - pos).length();
+// 			VEC3D norm1 = (p1 - pos) / dist1;
+// 			VEC3D norm2 = (p2 - pos) / dist2;
+// 			VEC3D p0 = (dist1 * norm1) + (dist2 * norm2) + pos;
 // 			initDummyParticle(wallId + count, p0, hp, isInner, isInner, isMov);
 // 		}
 // 
@@ -456,8 +456,8 @@ void sphydrodynamics::runPeriodicBoundary()
 // 		if (i > 1){
 // 			for (int j = 1; j < i; j++){
 // 				count += 2;
-// 				VEC3F p3 = p1 - (j * pspace) * n2;
-// 				VEC3F p4 = p2 - (j * pspace) * n1;
+// 				VEC3D p3 = p1 - (j * pspace) * n2;
+// 				VEC3D p4 = p2 - (j * pspace) * n1;
 // 				if (!onlyCountParticles){
 // 					hp = rho * -9.80665f * (p3.y - pos.y);
 // 					initDummyParticle(wallId + count - 1, p3, abs(hp) < 1e-9f ? 0.0f : hp, false, false, isMov);
@@ -495,12 +495,12 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 	if (tdim == DIM3){
 		for (size_t i = 0; i < overlappingLines.size(); i++){
 			overlappingLine *ol = &overlappingLines[i];
-			VEC3F diff = ol->p2 - ol->p1;
-			int lineCnt_a = (int)(diff.length() / particleSpacing() + 0.5f);
-			float spacing_a = diff.length() / lineCnt_a;
-			VEC3F unitdiff = diff.normalize();
+			VEC3D diff = ol->p2 - ol->p1;
+			int lineCnt_a = (int)(diff.length() / particleSpacing() + 0.5);
+			double spacing_a = diff.length() / lineCnt_a;
+			VEC3D unitdiff = diff.normalize();
 			for (int i = 1; i < lineCnt_a; i++){
-				VEC3F displacement = 0.f;
+				VEC3D displacement = 0.0;
 				if (!onlyCountParticles){
 					displacement = ol->p1 + (i * spacing_a) * unitdiff;
 					fluid_particle* p = &fp[overlappedCornersStart + count];
@@ -510,12 +510,12 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 					p->setPosition(displacement);
 					p->setDensity(rho);
 					p->setMass(particleMass[FLUID]);
-					p->setPressure(0.f);
-					p->setVelocity(VEC3F(0.f));
+					p->setPressure(0.0);
+					p->setVelocity(VEC3D(0.0));
 					particleCountByType[BOUNDARY]++;
 				}
 				if (tBT == DUMMY_PARTICLE_METHOD){
-					count += 1 + initDummyCorner(overlappedCornersStart + count, displacement, VEC3F(0.f, 0.f, 0.f), -ol->t1, -ol->t2, onlyCountParticles, false, false);
+					count += 1 + initDummyCorner(overlappedCornersStart + count, displacement, VEC3D(0.0, 0.0, 0.0), -ol->t1, -ol->t2, onlyCountParticles, false, false);
 				}
 				else{
 					count += 1;
@@ -529,7 +529,7 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 				continue;
 			}
 			for (int j = 0; j <= layers; j++){
-				VEC3F displacement = 0.f;
+				VEC3D displacement = 0.0;
 				if (!onlyCountParticles){
 					
 					displacement = oc->c1.position - j * pspace * oc->c3.normal;
@@ -540,12 +540,12 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 					p->setPosition(displacement);
 					p->setDensity(rho);
 					p->setMass(particleMass[FLUID]);
-					p->setPressure(0.f);
-					p->setVelocity(VEC3F(0.f));
+					p->setPressure(0.0);
+					p->setVelocity(VEC3D(0.0));
 					particleCountByType[BOUNDARY]++;
 				}
 				if (tBT == DUMMY_PARTICLE_METHOD){
-					count += 1 + initDummyCorner(overlappedCornersStart + count, displacement, VEC3F(0.f, 0.f, 0.f), oc->c1.normal, oc->c2.normal, onlyCountParticles, false, false);
+					count += 1 + initDummyCorner(overlappedCornersStart + count, displacement, VEC3D(0.0, 0.0, 0.0), oc->c1.normal, oc->c2.normal, onlyCountParticles, false, false);
 				}
 				else{
 					count += 1;
@@ -557,8 +557,8 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 	else{
 		for (size_t i = 0; i < overlappingCorners.size(); i++){
 			overlappingCorner *oc = &overlappingCorners[i];
-			VEC3F tv = oc->c1.tangent - oc->c2.tangent;
-			VEC3F tu = tv / tv.length();
+			VEC3D tv = oc->c1.tangent - oc->c2.tangent;
+			VEC3D tu = tv / tv.length();
 			if (oc->isMovement){
 				oc->sid = overlappedCornersStart + count;
 			}
@@ -576,7 +576,7 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 				p->setNormal(oc->c1.normal);
 				p->setNormal2(oc->c2.normal);
 				p->setMass(particleMass[FLUID]);
-				p->setPressure(0.f);
+				p->setPressure(0.0);
 				p->setVelocity(oc->iniVel);
 				p->setAuxVelocity(oc->iniVel);
 				particleCountByType[BOUNDARY]++;
@@ -588,7 +588,7 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 			// 			icount++;
 			// 		}
 
-			float dot = oc->c1.normal.dot(oc->c2.tangent);
+			double dot = oc->c1.normal.dot(oc->c2.tangent);
 			//count+=1;
 			if (dot <= 0 && tBT == DUMMY_PARTICLE_METHOD)
 				count += 1 + initDummyCorner(overlappedCornersStart + count, oc->c1.position.toVector2(), oc->iniVel, oc->c1.normal.toVector2(), oc->c2.normal.toVector2(), onlyCountParticles, oc->isInner, oc->isMovement);
@@ -605,7 +605,7 @@ size_t sphydrodynamics::initOverlappingCorners(bool onlyCountParticles)
 
 void sphydrodynamics::ComputeDeltaP()
 {
-	float QSq = pspace * pspace * skernel.h_inv_sq;
+	double QSq = pspace * pspace * skernel.h_inv_sq;
 	if (tdim == DIM3)
 		QSq *= pspace;
 	deltap = sphkernel->sphKernel(QSq);
@@ -666,8 +666,8 @@ bool sphydrodynamics::preProcessGeometry()
 	particleCountByType[FLOATING] += nfloat;
 	np += nfloat;
 	if (tCorr == GRADIENT_CORRECTION){
-		matKgc = new float6[np];
-		memset(matKgc, 0, sizeof(float6) * np);
+		matKgc = new double6[np];
+		memset(matKgc, 0, sizeof(double6) * np);
 	}
 	for (it = models.begin(); it != models.end(); it++){
 		if (it->second->particleType() == BOUNDARY){
@@ -719,7 +719,7 @@ size_t sphydrodynamics::makeFloating(bool isOnlyCount)
 // 			//bool fit = true;
 // 			if (!isOnlyCount){
 // 				size_t id = nfluid + cnt;
-// 				VEC3F position = VEC3F(j * pspace + 0.225f, -1.0f * i * pspace + 0.3f, 0.f);
+// 				VEC3D position = VEC3D(j * pspace + 0.225f, -1.0f * i * pspace + 0.3f, 0.f);
 // 				fluid_particle *p = particle(id);
 // 				p->setID(id);
 // 				p->setType(FLOATING);
@@ -728,7 +728,7 @@ size_t sphydrodynamics::makeFloating(bool isOnlyCount)
 // 				p->setMass(particleMass[FLUID]);
 // 				p->setPressure(0.f);
 // 				p->setVisible(false);
-// 				p->setVelocity(VEC3F(0.0f, 0.0f, 0.0f));
+// 				p->setVelocity(VEC3D(0.0f, 0.0f, 0.0f));
 // 				if (i == 0){
 // 					p->setVisible(true);
 // 				}
@@ -747,7 +747,7 @@ size_t sphydrodynamics::makeFloating(bool isOnlyCount)
 // 		for (size_t j = 0; j < 20; j++){
 // 			if (!isOnlyCount){
 // 				size_t id = nfluid + cnt;
-// 				VEC3F position = VEC3F(i * pspace + 0.35f, j * pspace + 0.03f, 0.f);
+// 				VEC3D position = VEC3D(i * pspace + 0.35f, j * pspace + 0.03f, 0.f);
 // 				fluid_particle *p = particle(id);
 // 				p->setID(id);
 // 				p->setType(FLOATING);
@@ -756,7 +756,7 @@ size_t sphydrodynamics::makeFloating(bool isOnlyCount)
 // 				p->setMass(particleMass[FLUID] * 0.7f);
 // 				p->setPressure(0.f);
 // 				p->setVisible(false);
-// 				p->setVelocity(VEC3F(0.0f, 0.0f, 0.0f));
+// 				p->setVelocity(VEC3D(0.0f, 0.0f, 0.0f));
 // 				if (i == 0 || i == 19)
 // 					p->setVisible(true);
 // 				if (j == 0 || j == 19)
@@ -808,9 +808,9 @@ bool sphydrodynamics::initGeometry()
 	return true;
 }
 
-void sphydrodynamics::gradientCorrection(size_t id, VEC3F& gradW)
+void sphydrodynamics::gradientCorrection(size_t id, VEC3D& gradW)
 {
-	VEC3F _gW;
+	VEC3D _gW;
 	if (tdim == DIM3){
 		_gW.x = matKgc[id].s0 * gradW.x + matKgc[id].s1 * gradW.y + matKgc[id].s2 * gradW.z;
 		_gW.y = matKgc[id].s1 * gradW.x + matKgc[id].s3 * gradW.y + matKgc[id].s4 * gradW.z;
@@ -824,22 +824,22 @@ void sphydrodynamics::gradientCorrection(size_t id, VEC3F& gradW)
 	gradW = _gW;
 }
 
-// void sphydrodynamics::correctionGradient(size_t id, fluid_particle* parj, VEC3F& gradW, VEC3F& rba)
+// void sphydrodynamics::correctionGradient(size_t id, fluid_particle* parj, VEC3D& gradW, VEC3D& rba)
 // {
 // 	if (fp[id].particleType() != FLUID)
 // 		return;
-// 	float volj = parj->mass() / parj->density();
-// 	VEC3F fr = volj * gradW;
+// 	double volj = parj->mass() / parj->density();
+// 	VEC3D fr = volj * gradW;
 // 	matKgc[id].s0 += fr.x * rba.x; matKgc[id].s1 += fr.x * rba.y; matKgc[id].s2 += fr.x * rba.z;
 // 	matKgc[id].s1 += fr.y * rba.x; matKgc[id].s3 += fr.y * rba.y; matKgc[id].s4 += fr.y * rba.z;
 // 	matKgc[id].s2 += fr.z * rba.x; matKgc[id].s4 += fr.z * rba.y; matKgc[id].s5 += fr.z * rba.z;
 //}
 
-float sphydrodynamics::newTimeStep()
+double sphydrodynamics::newTimeStep()
 {
-	float dt_cfl = 0.1f * pspace / maxVel;
-	float dt_forces = 0.25f*sqrt(skernel.h / maxAcc);
-//	float dt_visc = 0.1f * pspace * pspace / dynVisc;
+	double dt_cfl = 0.1 * pspace / maxVel;
+	double dt_forces = 0.25*sqrt(skernel.h / maxAcc);
+//	double dt_visc = 0.1f * pspace * pspace / dynVisc;
 	return dt_cfl < dt_forces ? dt_cfl : dt_forces;// (dt_forces < dt_visc ? dt_forces : dt_visc);
 }
 
@@ -851,24 +851,24 @@ void sphydrodynamics::calcFreeSurface(bool isInit)
 			continue;
 		}
 		
-		VEC3F posI = parI->position();
-		float div_r = 0;
+		VEC3D posI = parI->position();
+		double div_r = 0;
 
 		for (NeighborIterator it = parI->BeginNeighbor(); it != parI->EndNeighbor(); it++){
-			VEC3F posDif = it->dp;//posI - it->j->position();
-			float gp = it->gradW.dot(posDif);
+			VEC3D posDif = it->dp;//posI - it->j->position();
+			double gp = it->gradW.dot(posDif);
 			div_r -= (it->j->mass() / it->j->density()) * gp;
 		}
 		for (std::map<size_t, fluid_particle::ghostParticleInfo>::iterator it = parI->Ghosts()->begin(); it != parI->Ghosts()->end(); it++){
-			VEC3F posDif = posI - it->second.pos;
-			float gp = it->second.gradW.dot(posDif);
+			VEC3D posDif = posI - it->second.pos;
+			double gp = it->second.gradW.dot(posDif);
 			div_r -= (fp[it->second.baseIdx].mass() / fp[it->second.baseIdx].density()) * gp;
 		}
 		//std::cout << div_r << std::endl;
 		parI->setDivP(div_r);
 		if (div_r < fsFactor){
 			parI->setFreeSurface(true);
-			parI->setPressure(0.0f);
+			parI->setPressure(0.0);
 			//pressure[i] = 0.f;
 		}
 // 		else if (div_r < 1.8f && parI->particleType() == BOUNDARY){
@@ -883,7 +883,7 @@ void sphydrodynamics::calcFreeSurface(bool isInit)
 		for (size_t i = 0; i < np; i++)
 		{
 			if (fp[i].particleType() == BOUNDARY){
-				float press = fp[i].pressure();
+				double press = fp[i].pressure();
 				size_t j = i + 1;
 				while (j < np && fp[j].particleType() == DUMMY){
 					fp[j].setPressure(press);
@@ -897,18 +897,18 @@ void sphydrodynamics::calcFreeSurface(bool isInit)
 void sphydrodynamics::gradientCorrection()
 {
 	fluid_particle* _fp = NULL;
-	VEC3F dp;
-	float xx, yy, zz, xy, yx, xz, yz;
-	float _xx, _yy, _xy;
-	float6 imat = { 1.f, 0.f, 0.f, 1.f, 0.f, 1.f };
-	float6 imat2d = { 1.f, 0.f, 1.f, 0.f, 0.f, 0.f };
+	VEC3D dp;
+	double xx, yy, zz, xy, yx, xz, yz;
+	double _xx, _yy, _xy;
+	double6 imat = { 1.0, 0.0, 0.0, 1.0, 0.0, 1.0 };
+	double6 imat2d = { 1.0, 0.0, 1.0, 0.0, 0.0, 0.0 };
 	for (size_t i = 0; i < np; i++)
 	{
 		_fp = fp + i;
 		if (_fp->particleType() == DUMMY)
 			continue;
-		xx = 0.f; yy = 0.f; zz = 0.f; xy = 0.f; xz = 0.f; yz = 0.f; yx = 0.f;
-		_xx = 0.f; _yy = 0.f; _xy = 0.f;
+		xx = 0.0; yy = 0.0; zz = 0.0; xy = 0.0; xz = 0.0; yz = 0.0; yx = 0.0;
+		_xx = 0.0; _yy = 0.0; _xy = 0.0;
 		for (NeighborIterator it = _fp->BeginNeighbor(); it != _fp->EndNeighbor(); it++){
 			dp = _fp->position() - it->j->position();
 			xx -= dp.x * it->gradW.x; 
@@ -924,11 +924,11 @@ void sphydrodynamics::gradientCorrection()
 			}
 		}
 		if (tdim == DIM3){
-			float det = (_fp->mass() / rho) * (xx * (zz * yy - yz * yz)
+			double det = (_fp->mass() / rho) * (xx * (zz * yy - yz * yz)
 										     - xy * (zz * xy - yz * xz)
 											 + xz * (yz * xy - yy * xz));
-			if (abs(det) > 0.01f){
-				float6 corr = { (yy*zz - yz*yz) / det
+			if (abs(det) > 0.01){
+				double6 corr = { (yy*zz - yz*yz) / det
 					, (xz*yz - xy*zz) / det
 					, (xy*yz - yy*xz) / det
 					, (xx*zz - xz*xz) / det
@@ -942,9 +942,9 @@ void sphydrodynamics::gradientCorrection()
 		}
 		else{
 			//xy = 0.5f * xy;
-			float det = volume * (xx * yy - xy * xy);
-			if (abs(det) > 0.01f/* && abs(xx) > 0.25f && abs(yy) > 0.25f*/){
-				float6 corr = { yy / det
+			double det = volume * (xx * yy - xy * xy);
+			if (abs(det) > 0.01/* && abs(xx) > 0.25f && abs(yy) > 0.25f*/){
+				double6 corr = { yy / det
 					, -xy / det
 					//, -yx / det
 					, xx / det
@@ -966,7 +966,7 @@ void sphydrodynamics::gradientCorrection()
 // 			fp[i].setPositionTemp(fp[i].position());
 // 			fp[i].setVelocityTemp(fp[i].velocity());
 // 			if (fp[i].particleType() == BOUNDARY){
-// 				float press = fp[i].pressure();
+// 				double press = fp[i].pressure();
 // 				size_t j = i + 1;
 // 
 // 				while (j < np && fp[j].particleType() == DUMMY){
@@ -1075,7 +1075,7 @@ void sphydrodynamics::resizeParticle(size_t numg)
 
 void sphydrodynamics::exportParticlePosition(size_t pit)
 {
-	float t = pit * dt;
+	double t = pit * dt;
 	char pt[256] = { 0, };
 	sprintf_s(pt, 256, "C:/C++/kangsia/case/Lid_driven_cavity_flow/part%f.txt", t);
 	std::fstream of;
@@ -1102,7 +1102,7 @@ void sphydrodynamics::initializeGhostMap()
 	nghost = 0;
 }
 
-void sphydrodynamics::runModelExpression(float dt, float time)
+void sphydrodynamics::runModelExpression(double dt, double time)
 {
 	std::multimap<std::string, geo::geometry*>::iterator it;
 	for (it = models.begin(); it != models.end(); it++){
@@ -1116,7 +1116,7 @@ void sphydrodynamics::runModelExpression(float dt, float time)
 // 		if (oc.isMovement)
 // 		{
 // 			if (time >= 0.1f/* && time < 0.16f*/){
-// 				float sign = 1.f;
+// 				double sign = 1.f;
 // 				// 		if (time > 0.16f && time < 0.26f)
 // 				// 			sign = -1.f;
 // 				// 		else if (time > 0.26f)
@@ -1128,15 +1128,15 @@ void sphydrodynamics::runModelExpression(float dt, float time)
 // 				fluid_particle* fp = particle(oc.sid);
 // 				for (unsigned int j = 0; j < oc.cnt; j++){
 // 					fp = particle(oc.sid + j);
-// 					VEC3F upos = fp->positionTemp();
-// 					upos.x += 0.02f * sin(2.0f * M_PI * (time - 0.1f));//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (float)M_PI * (time - startMovementTime))) * VEC3F(1.0f, 0.0f, 0.0f); //dt * initVel;
+// 					VEC3D upos = fp->positionTemp();
+// 					upos.x += 0.02f * sin(2.0f * M_PI * (time - 0.1f));//fp->position() + sign * dt * initVel;//abs(0.01f * sin(2.0f * (double)M_PI * (time - startMovementTime))) * VEC3D(1.0f, 0.0f, 0.0f); //dt * initVel;
 // 					//fp->setPosition();
-// 					//VEC3F uvel = abs(0.08f * M_PI * cos(4.0f * M_PI * (time - startMovementTime))) * VEC3F(1.f, 0.f, 0.f);//;*/ sign * initVel;
-// 					VEC3F uvel = (upos - fp->position()) / dt;
+// 					//VEC3D uvel = abs(0.08f * M_PI * cos(4.0f * M_PI * (time - startMovementTime))) * VEC3D(1.f, 0.f, 0.f);//;*/ sign * initVel;
+// 					VEC3D uvel = (upos - fp->position()) / dt;
 // 					fp->setPosition(upos);
 // 					//if (fp->particleType() == DUMMY){
-// 					//fp->setVelocity(VEC3F(0.f, 0.f, 0.f));
-// 					//fp->setAuxVelocity(VEC3F(0.f, 0.f, 0.f));
+// 					//fp->setVelocity(VEC3D(0.f, 0.f, 0.f));
+// 					//fp->setAuxVelocity(VEC3D(0.f, 0.f, 0.f));
 // 					//}
 // 					//else{
 // 					fp->setVelocity(uvel);
@@ -1150,15 +1150,15 @@ void sphydrodynamics::runModelExpression(float dt, float time)
 // 	}
 }
 
-float sphydrodynamics::updateTimeStep()
+double sphydrodynamics::updateTimeStep()
 {
-	float new_dt = 0.125f * skernel.h / maxVel;
+	double new_dt = 0.125 * skernel.h / maxVel;
 // 	if (dt > new_dt)
 // 		dt = new_dt;
 	return new_dt;
 }
 
-// void sphydrodynamics::setPeriodicBoundary(PeriodicDirection _pd, float _pmin, float _pmax)
+// void sphydrodynamics::setPeriodicBoundary(PeriodicDirection _pd, double _pmin, double _pmax)
 // {
 // 	pdirect = _pd;
 // 	pmin = _pmin;

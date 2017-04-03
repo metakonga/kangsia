@@ -15,14 +15,14 @@ plane::~plane()
 
 }
 
-void plane::define(VEC3F& _p1, VEC3F& _p2, VEC3F& _p3, VEC3F& _p4, bool considerHP /* = false */, bool isInner /* = false */)
+void plane::define(VEC3D& _p1, VEC3D& _p2, VEC3D& _p3, VEC3D& _p4, bool considerHP /* = false */, bool isInner /* = false */)
 {
 	p1 = _p1;
 	p2 = _p2;
 	p3 = _p3;
 	p4 = _p4;
-	VEC3F vec_a = p2 - p1;
-	VEC3F vec_b = p4 - p1;
+	VEC3D vec_a = p2 - p1;
+	VEC3D vec_b = p4 - p1;
 	normal = vec_a.cross(vec_b).normalize();
 }
 
@@ -30,14 +30,14 @@ void plane::build(bool onlyCountParticles)
 {
  	pcount = 0;
 	bool b1, b2, b3, b4;
-	VEC3F vec_a = p2 - p1;
-	VEC3F vec_b = p4 - p1;
- 	int lineCnt_a = (int)(vec_a.length() / sph->particleSpacing() + 0.5f);
-	int lineCnt_b = (int)(vec_b.length() / sph->particleSpacing() + 0.5f);
- 	float spacing_a = vec_a.length() / lineCnt_a;
-	float spacing_b = vec_b.length() / lineCnt_b;
-	VEC3F unitdiff_a = vec_a.normalize();
-	VEC3F unitdiff_b= vec_b.normalize();
+	VEC3D vec_a = p2 - p1;
+	VEC3D vec_b = p4 - p1;
+ 	int lineCnt_a = (int)(vec_a.length() / sph->particleSpacing() + 0.5);
+	int lineCnt_b = (int)(vec_b.length() / sph->particleSpacing() + 0.5);
+ 	double spacing_a = vec_a.length() / lineCnt_a;
+	double spacing_b = vec_b.length() / lineCnt_b;
+	VEC3D unitdiff_a = vec_a.normalize();
+	VEC3D unitdiff_b= vec_b.normalize();
 	b1 = InitParticle(p1, normal, vec_a.normalize(), onlyCountParticles, true, 0, false, isInner);
 	b2 = InitParticle(p2, normal, vec_a.normalize(), onlyCountParticles, true, 0, false, isInner);
 	b3 = InitParticle(p3, normal, vec_b.normalize(), onlyCountParticles, true, 0, false, isInner);
@@ -55,31 +55,31 @@ void plane::build(bool onlyCountParticles)
 // 	else{
 	if (!b1 || !b4){
 		for (int i = 1; i < lineCnt_b; i++){
-			VEC3F displacement = p1 + (i * spacing_b) * unitdiff_b;
+			VEC3D displacement = p1 + (i * spacing_b) * unitdiff_b;
 			InitParticle(displacement, normal, unitdiff_a, onlyCountParticles, false, 0, false, isInner);
 		}
 	}
 //	}
 
 	for (int i = 1; i < lineCnt_a; i++){
-		//VEC3F displacement = 0.f;
+		//VEC3D displacement = 0.f;
 		if (!b1 || !b2){
-			VEC3F displacement = p1 + (i * spacing_a) * unitdiff_a;
+			VEC3D displacement = p1 + (i * spacing_a) * unitdiff_a;
 			InitParticle(displacement, normal, unitdiff_a, onlyCountParticles, false, 0, false, isInner);
 		}
 		for (int j = 1; j < lineCnt_b; j++){
-			VEC3F disp2 = p1 + (i * spacing_a) * unitdiff_a + (j * spacing_b) * unitdiff_b;
+			VEC3D disp2 = p1 + (i * spacing_a) * unitdiff_a + (j * spacing_b) * unitdiff_b;
 			InitParticle(disp2, normal, unitdiff_a, onlyCountParticles, false, 0, false, isInner);
 		}
 		if (!b4 || !b3){
-			VEC3F displacement = p4 + (i * spacing_a) * unitdiff_a;
+			VEC3D displacement = p4 + (i * spacing_a) * unitdiff_a;
 			InitParticle(displacement, normal, unitdiff_a, onlyCountParticles, false, 0, false, isInner);
 		}
 	}
 
 	if (!b2 || !b3){
 		for (int i = 1; i < lineCnt_b; i++){
-			VEC3F displacement = p2 + (i * spacing_b) * unitdiff_b;
+			VEC3D displacement = p2 + (i * spacing_b) * unitdiff_b;
 			InitParticle(displacement, normal, unitdiff_a, onlyCountParticles, false, 0, false, isInner);
 		}
 	}
@@ -115,7 +115,7 @@ void plane::build(bool onlyCountParticles)
 
 }
 
-bool plane::particleCollision(const VEC3F& position, float radius)
+bool plane::particleCollision(const VEC3D& position, double radius)
 {
 	return utils::circlePlaneIntersect(p1, p2, p3, p4, position, radius);
 }
