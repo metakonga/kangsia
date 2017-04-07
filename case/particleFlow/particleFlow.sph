@@ -1,0 +1,5 @@
+model_path C:/C++/kangsia/case/particleFlow
+model_name particleFlow
+num_fluid 3120
+num_boundary 160
+num_dummy 640

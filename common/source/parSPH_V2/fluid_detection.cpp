@@ -66,6 +66,10 @@ bool fluid_detection::initGrid()
 	cSize_inv = 1.0 / gcSize;
 
 	size_t np = sph->nParticle();
+	if (sph->getPeriodicParticles())
+	{
+		np += sph->getPeriodicParticles()->nParticle();
+	}
 	hashes = new VEC2UI[np];
 	cell_id = new size_t[np];		memset(cell_id, 0, sizeof(size_t)*np);
 	cell_start = new size_t[cells];	memset(cell_start, 0, sizeof(size_t)*cells);
@@ -185,7 +189,11 @@ void fluid_detection::forEachSetup(fluid_particle* parI)
 		loopStart = cellPos(posI - sph->kernelSupportRadius());
 		loopEnd = cellPos(posI + sph->kernelSupportRadius());
 	}
+// 	if (loopEnd.x == cellCount_1.x)
+// 		loopEnd.x = 0;
 	//if (sph->)
+	if (parI->ID() == 3080)
+		bool dd = true;
 	if (parI->Neighbors()->size())
 		parI->Neighbors()->clear();
 }
@@ -204,11 +212,26 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 	VEC3D posi = pari->position();// : pari->auxPosition();
 	VEC3D posj;
 	bool isperi = false;
+	bool isperi2 = false;
 	int dx = 0;
 	//std::cout << pari->ID() << std::endl;
 	if (sph->dimension() == DIM2){
 		for (cellJ.y = loopStart.y; cellJ.y <= loopEnd.y; cellJ.y++){
 			for (cellJ.x = loopStart.x; cellJ.x <= loopEnd.x; cellJ.x++){
+				if (isperi && cellJ.x == 1)
+					isperi2 = true;
+
+				if (cellJ.x == cellCount_1.x)
+				{
+					cellJ.x = 0;
+					isperi = true;
+				}
+				else if (cellJ.x == 0)
+				{
+					cellJ.x = cellCount_1.x - 1;
+					isperi = true;
+				}
+					
 // 				if (sph->getPeriodicDirection() == PERI_X)
 // 				{
 // 					dx = peri_maxCI.x - cellJ.x;
@@ -244,7 +267,12 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 // 							posDif = -(VEC3D(sph->getPeriodicBoundaryMax(), 0, 0) - VEC3D(sph->getPeriodicBoundaryMin(), 0, 0) - (posi - posj));
 // 						else
 						posDif = posi - posj;
+						if (isperi)
+							posDif.x = posi.x < posj.x ? 0.2 + posDif.x : -0.2 + posDif.x;
+						
 						QSq = posDif.dot() * sph->smoothingKernel().h_inv_sq;
+						if (parj->particleType() == FLUID)
+							bool dd = true;
 						if (QSq >= sph->kernelFunction()->KernelSupprotSq())
 							continue;
 						fluid_particle::neighborInfo ni;
@@ -260,6 +288,17 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 							}
 						}
 					}
+				}
+				if (isperi2)
+				{
+					cellJ.x = loopEnd.x;
+					isperi = false;
+					isperi2 = false;
+				}	
+				if (isperi && cellJ.x == cellCount_1.x - 1)
+				{
+					cellJ.x = 0;
+					isperi = false;
 				}
 			}
 		}
@@ -428,6 +467,7 @@ void fluid_detection::sort(bool isf)
 // 		}
 // 		return;
 // 	}
+	//std::cout << "done" << std::endl;
 	for (size_t i = 0; i < sph->nParticle(); i++){
 		forEachSetup(sph->particle(i));
 		forEachNeighbor(sph->particle(i));

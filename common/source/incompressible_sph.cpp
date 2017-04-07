@@ -4,6 +4,7 @@
 #include "quadraticKernel.h"
 #include "timer.h"
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 
 incompressible_sph::incompressible_sph(std::string _path, std::string _name)
@@ -68,7 +69,7 @@ bool incompressible_sph::initialize()
 	kinVisc = dynVisc / rho;
 
 	fsFactor = tdim == DIM2 ? 1.5 : 2.4;
-
+	fsFactor = 0.0;
 	//fd->initGrid();
 
 	switch (skernel.kernel){
@@ -120,7 +121,7 @@ bool incompressible_sph::initialize()
 		if (fp[i].particleType() == DUMMY){
 			continue;
 		}
-		double press0 = fp[i].density() * grav.length() * (maxHeight - fp[i].position().y);
+		double press0 = 0;// fp[i].density() * grav.length() * (maxHeight - fp[i].position().y);
 		//	pressure[i] = press0;
  		fp[i].setHydroPressure(press0);
  		fp[i].setPressure(press0);
@@ -847,7 +848,7 @@ void incompressible_sph::predict_the_acceleration()
 		ip = _fp->position();
 		iv = _fp->velocity();
 		ia = grav;
-
+		
 		for (NeighborIterator it = _fp->BeginNeighbor(); it != _fp->EndNeighbor(); it++){
 // 			if (it->j->particleType() == BOUNDARY)
 // 				continue;
@@ -918,9 +919,13 @@ void incompressible_sph::pressure_poisson_equation(double* out, double* p)
 		if (_fp->particleType() == FLUID || _fp->particleType() == FLOATING)
 			if (_fp->IsFreeSurface())
 				ipress *= 1.8;
+		if (i == 35)
+			i = 35;
 		for (NeighborIterator it = _fp->BeginNeighbor(); it != _fp->EndNeighbor(); it++){
 			if (i != it->j->ID())
 			{
+				if (it->j->particleType() == PERI_BOUNDARY)
+					continue;
 				jpress = p ? p[it->j->ID()] : it->j->pressure();
 				jp = it->j->position();
 				dpress = ipress - jpress;
@@ -953,6 +958,8 @@ void incompressible_sph::ppe_right_hand_side(double* out)
 		div_u = 0.0;
 		iv = _fp->auxVelocity();
 		for (NeighborIterator it = _fp->BeginNeighbor(); it != _fp->EndNeighbor(); it++){
+			if (it->j->particleType() == PERI_BOUNDARY)
+				continue;
 			dv = iv - it->j->auxVelocity();
 			div_u += it->j->mass() * dv.dot(it->gradW);
 		}
@@ -1002,6 +1009,7 @@ size_t incompressible_sph::solve_the_pressure_poisson_equation_by_Bi_CGSTAB()
 	size_t it = 0;
 	for (it = 0; it < ppeIter; it++){
 		pressure_poisson_equation(tmp0, conjugate0);
+		double dd = dotProductIgnoreType(_rhs, tmp0, DUMMY);
 		alpha = ip_rr / dotProductIgnoreType(_rhs, tmp0, DUMMY);
 		malpha = -alpha;
 		for (size_t j = 0; j < np; j++)
@@ -1033,8 +1041,8 @@ size_t incompressible_sph::solve_the_pressure_poisson_equation_by_Bi_CGSTAB()
 	if (boundaryTreatment() == DUMMY_PARTICLE_METHOD)
 	{
 		for (size_t i = 0; i < np; i++){
-			if (fp[i].pressure() < 0)
-				fp[i].setPressure(0.0);
+// 			if (fp[i].pressure() < 0)
+// 				fp[i].setPressure(0.0);
 			if (fp[i].particleType() == BOUNDARY){
 				double press = fp[i].pressure();
 				size_t j = i + 1;
@@ -1086,6 +1094,10 @@ void incompressible_sph::correct_by_adding_the_pressure_gradient_term()
 		nv = _fp->auxVelocity() - dt * acci;
 	//	nv = _fp->auxVelocity() + dt*(grav - acci);
 		pos = _fp->position() + dt * nv;
+		if (pos.x > 0.2)
+		{
+			pos.x -= 0.2;
+		}
 	//	pos = _fp->position() + dt * 0.5f * (_fp->velocity() + nv);
 		vel = nv;
 // 		if (i == 7140)
@@ -1261,7 +1273,7 @@ void incompressible_sph::cpuRun()
 	{
 		std::cout << "| " << std::setw(9) << part - 1 << std::setw(12) << ct << std::setw(10) << eachStep << std::setw(11) << cstep << std::setw(15) << 0 << std::setw(8) << ppe_iter << std::setw(0) << " |" << std::endl;
 	}
- 	//exportParticlePosition();
+ 	exportParticlePosition(0);
 	tmer.Start();
 	while (cstep < nstep){
 		cstep++;
@@ -1278,9 +1290,22 @@ void incompressible_sph::cpuRun()
 		calcFreeSurface(false);
 		size_t ppe_iter_pre = ppe_iter;
 		ppe_iter += solve_the_pressure_poisson_equation_by_Bi_CGSTAB();
+		//std::cout << "ppe_iter : " << ppe_iter << std::endl;
 		if ((ppe_iter - ppe_iter_pre) == ppeIter)
 			std::cout << "over iteration : " << ppe_iter - ppe_iter_pre << std::endl;
 		correct_by_adding_the_pressure_gradient_term();
+	//	exportParticlePosition(cstep);
+//		runPeriodicBoundary();
+// 		//std::string ch;
+// 		std::stringstream ss;
+// 		ss << "C:/FAMCAP/case/step" << cstep << ".txt";
+// 		std::fstream fs;
+// 		fs.open(ss.str(), std::ios::out);
+// 		for (size_t i = 0; i < np; i++)
+// 		{
+// 			fs << i << " " << fp[i].pressure() << std::endl;
+// 		}
+// 		fs.close();
 		if(particleCountByType[FLOATING])
 			update_floating_body();
 		if (pshift.enable){

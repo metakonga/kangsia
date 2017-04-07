@@ -18,12 +18,12 @@ public:
 		//unsigned int ns = sizeof(float);
 		isph->setDevice(GPU);
 		isph->setDimension(DIM2);
-		isph->setTimeStep(2.0e-3);
+		isph->setTimeStep(1.0e-3);
 		isph->setStep(500);
 		isph->setEndTime(260.0);
 		isph->setProjectionFrom(NONINCREMENTAL, 1);
 		isph->setPPESolver(250, 1e-2);
-		isph->setKernel(QUADRATIC, false, 0.013);
+		isph->setKernel(QUINTIC, false, 0.013);
 		//isph->setPeriodicBoundary(PERI_X, 0.0, 0.2);
 		//isph->setKernel(CUBIC_SPLINE, false, 0.013f);
 		isph->setGravity(0.0, 0.0, 0.0);
@@ -51,7 +51,7 @@ public:
 		//isph->setPeriFluidLimitation(0.2f);
 
 		geo::line *top_wall = new geo::line(isph, BOUNDARY, "top_wall");
-		top_wall->define(VEC3D(1.06, 1.0, 0.0), VEC3D(-0.06, 1.0, 0.0), true);
+		top_wall->define(VEC3D(1.04, 1.0, 0.0), VEC3D(-0.04, 1.0, 0.0), true);
 		//top_wall->setExpressionMovement(true);
 		top_wall->setInitialVelocity(VEC3D(1.0, 0.0, 0.0));
 

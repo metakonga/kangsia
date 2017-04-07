@@ -130,6 +130,7 @@ size_t sphydrodynamics::initPeriodic(size_t id, VEC3D& pos, VEC3D& initVel, VEC3
 			par->setMass(particleMass[FLUID]);
 			par->setPressure(0.0);
 			par->setVelocity(initVel);
+			par->setAuxVelocity(initVel);
 			particleCountByType[PERI_BOUNDARY] += 1;
 		}
 		cnt++;
@@ -1077,7 +1078,7 @@ void sphydrodynamics::exportParticlePosition(size_t pit)
 {
 	double t = pit * dt;
 	char pt[256] = { 0, };
-	sprintf_s(pt, 256, "C:/C++/kangsia/case/Lid_driven_cavity_flow/part%f.txt", t);
+	sprintf_s(pt, 256, "%s%s/part%d.txt", path.c_str(), name.c_str(), pit);
 	std::fstream of;
 	of.open(pt, std::ios::out);
 	for (size_t i = 0; i < np; i++){
@@ -1087,7 +1088,7 @@ void sphydrodynamics::exportParticlePosition(size_t pit)
 	{
 		for (size_t i = 0; i < peri->nParticle(); i++){
 			fluid_particle* p = peri->getParticle(i);
-			of << p->particleType() << " " << p->IsFreeSurface() << " " << p->position().x << " " << p->position().y << " " << p->position().z << " " << p->pressure() << std::endl;
+			of << t << " " << i << " " << p->particleType() << " " << p->position().x << " " << p->position().y << " " << p->position().z << " " << p->velocity().x << " " << p->velocity().y << " " << p->velocity().z << " " << p->pressure() << " " << p->IsFreeSurface() << std::endl;
 		}
 	}
 	of.close();

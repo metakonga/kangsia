@@ -11,29 +11,29 @@ public:
 
 	sphydrodynamics* initialize()
 	{
-		std::string basePath = "C:/C++/kangsia/case/parSPH_V2/";
+		std::string basePath = "C:/C++/kangsia/case/";
 		std::string caseName = "particleFlow";
 
 		incompressible_sph *isph = new incompressible_sph(basePath, caseName);
 		//unsigned int ns = sizeof(double);
 		isph->setDevice(GPU);
 		isph->setDimension(DIM2);
-		isph->setTimeStep(0.1e-3f);
-		isph->setStep(10);
-		isph->setEndTime(0.02f);
+		isph->setTimeStep(0.1e-3);
+		isph->setStep(100);
+		isph->setEndTime(1);
 		isph->setProjectionFrom(NONINCREMENTAL, 1);
-		isph->setPPESolver(250, 1e-2f);
-		isph->setKernel(QUADRATIC, false, 0.00325f);
+		isph->setPPESolver(250, 1e-2);
+		isph->setKernel(QUINTIC, false, 0.00325);
 		//isph->setPeriodicBoundary(PERI_X, 0.0, 0.2);
 		//isph->setKernel(CUBIC_SPLINE, false, 0.013f);
-		isph->setGravity(0.0f, -9.80665f, 0.0f);
-		isph->setParticleShifting(false, 1, 0.01f);
-		isph->setDensity(1000.f);
-		isph->setViscosity(0.001f);
+		isph->setGravity(0.0, -9.80665, 0.0);
+		isph->setParticleShifting(false, 1, 0.01);
+		isph->setDensity(1000.);
+		isph->setViscosity(0.001);
 		//isph->setFluidFillLocation(0.01f, 0.6f, 0.f);
-		isph->setFluidFillLocation(0.0025f, 0.0025f, 0.f);
+		isph->setFluidFillLocation(0.0, 0.0025, 0.0);
 		//isph->setParticleSpacing(0.01f);
-		isph->setParticleSpacing(0.0025f);
+		isph->setParticleSpacing(0.0025);
 		//isph->setBoundaryTreatment(GHOST_PARTICLE_METHOD);
 		isph->setBoundaryTreatment(DUMMY_PARTICLE_METHOD);
 		//isph->setCorrection(GRADIENT_CORRECTION);
@@ -42,31 +42,31 @@ public:
 		//fd->setWorldBoundary(VEC3D(-0.5f, -0.1f, 0.0f), VEC3D(3.5f, 2.2f, 0.0f));
 		//fd->setWorldBoundary(VEC3D(-0.1f, -0.1f, 0.0f), VEC3D(1.1f, 1.1f, 0.0f));
 		geo::line *fluid_left = new geo::line(isph, FLUID, "fluid left");
-		fluid_left->define(VEC3D(0.0f, 0.0f, 0.0f), VEC3D(0.0f, 0.1f, 0.0f), true);
+		fluid_left->define(VEC3D(-0.0025, 0.0, 0.0), VEC3D(-0.0025, 0.1, 0.0), true);
 
 		geo::line *fluid_right = new geo::line(isph, FLUID, "fluid right");
-		fluid_right->define(VEC3D(0.2f, 0.0f, 0.0f), VEC3D(0.2f, 0.1f, 0.0f), true);
+		fluid_right->define(VEC3D(0.2, 0.0, 0.0), VEC3D(0.2, 0.1, 0.0), true);
 
-		isph->setInitialVelocity(VEC3D(1.0f, 0.0f, 0.0f));
-		isph->setPeriFluidLimitation(0.2f);
+		isph->setInitialVelocity(VEC3D(1.0, 0.0, 0.0));
+		isph->setPeriFluidLimitation(0.2);
 
 		geo::line *top_wall = new geo::line(isph, BOUNDARY, "top_wall");
-		top_wall->define(VEC3D(0.21f, 0.1f, 0.0f), VEC3D(-0.01f, 0.1f, 0.0f), true);
+		top_wall->define(VEC3D(0.1975, 0.1, 0.0), VEC3D(0.0, 0.1, 0.0), true);
 
 		geo::line *bottom_wall = new geo::line(isph, BOUNDARY, "bottom_wall");
-		bottom_wall->define(VEC3D(-0.01f, 0.f, 0.f), VEC3D(0.21f, 0.f, 0.f), true);
+		bottom_wall->define(VEC3D(0.0, 0, 0), VEC3D(0.1975, 0, 0), true);
 
- 		geo::line *left_peri = new geo::line(isph, PERI_BOUNDARY, "left peri");
-		left_peri->define(VEC3D(-0.01f, 0.0975f, 0.f), VEC3D(-0.01f, 0.0025f, 0.0f), false);
-		left_peri->setPeriExtrudeCount(5);
-		left_peri->setInitialVelocity(VEC3D(1.0f, 0.0f, 0.0f));
-		left_peri->setPeriodicCondition(PERI_X, 0.0f, true);
+//  		geo::line *left_peri = new geo::line(isph, PERI_BOUNDARY, "left peri");
+// 		left_peri->define(VEC3D(-0.01, 0.0975, 0), VEC3D(-0.01, 0.0025, 0.0), false);
+// // 		left_peri->setPeriExtrudeCount(5);
+// // 		left_peri->setInitialVelocity(VEC3D(1.0, 0.0, 0.0));
+// // 		left_peri->setPeriodicCondition(PERI_X, 0.0, true);
 
-		geo::line *right_peri = new geo::line(isph, PERI_BOUNDARY, "right peri");
-		right_peri->define(VEC3D(0.21f, 0.0025f, 0.f), VEC3D(0.21f, 0.0975f, 0.f), false);
-		right_peri->setPeriExtrudeCount(5);
-		right_peri->setInitialVelocity(VEC3D(1.0f, 0.0f, 0.0f));
-		right_peri->setPeriodicCondition(PERI_X, 0.21f, false);
+// 		geo::line *right_peri = new geo::line(isph, PERI_BOUNDARY, "right peri");
+// 		right_peri->define(VEC3D(0.21, 0.0025, 0), VEC3D(0.21, 0.0975, 0), false);
+// 		right_peri->setPeriExtrudeCount(5);
+// 		right_peri->setInitialVelocity(VEC3D(1.0, 0.0, 0.0));
+// 		right_peri->setPeriodicCondition(PERI_X, 0.21, false);
 
 		if (!isph->initialize())
 			return NULL;

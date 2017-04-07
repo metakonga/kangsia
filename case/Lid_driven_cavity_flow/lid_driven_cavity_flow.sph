@@ -1,5 +1,5 @@
 model_path C:/C++/kangsia/case/lid_driven_cavity_flow
 model_name lid_driven_cavity_flow
 num_fluid 9801
-num_boundary 412
-num_dummy 1688
+num_boundary 408
+num_dummy 1672
