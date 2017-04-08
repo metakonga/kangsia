@@ -214,6 +214,7 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 	bool isperi = false;
 	bool isperi2 = false;
 	int dx = 0;
+	double periLimit = sph->getPeriLimit();
 	//std::cout << pari->ID() << std::endl;
 	if (sph->dimension() == DIM2){
 		for (cellJ.y = loopStart.y; cellJ.y <= loopEnd.y; cellJ.y++){
@@ -268,7 +269,7 @@ void fluid_detection::forEachNeighbor(fluid_particle* pari, VEC2UI *_hs)
 // 						else
 						posDif = posi - posj;
 						if (isperi)
-							posDif.x = posi.x < posj.x ? 0.2 + posDif.x : -0.2 + posDif.x;
+							posDif.x = posi.x < posj.x ? periLimit + posDif.x : -periLimit + posDif.x;
 						
 						QSq = posDif.dot() * sph->smoothingKernel().h_inv_sq;
 						if (parj->particleType() == FLUID)

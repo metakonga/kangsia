@@ -981,33 +981,32 @@ void sphydrodynamics::gradientCorrection()
 
 bool sphydrodynamics::exportData(size_t part)
 {
-	char v;
+//	char v;
+	double ct = part * dt;
 	char pt[256] = { 0, };
 	sprintf_s(pt, 256, "%s/part%04d.bin", (path + name).c_str() , part);
 	std::fstream pf;
 	pf.open(pt, std::ios::out | std::ios::binary);
-	double ps;
-	bool isf;
+	tParticle* _ptype = new tParticle[np];
+	VEC3D* _pos = new VEC3D[np];
+	VEC3D* _vel = new VEC3D[np];
+	double* _press = new double[np];
+	bool* _fs = new bool[np];
 	for (size_t i = 0; i < np; i++){
 		fluid_particle* _fp = fp + i;
-		if (!_fp->IsVisible())
-			continue;
-		switch (_fp->particleType()){
-		case FLUID: v = 'f'; pf.write(&v, sizeof(char)); break;
-		case FLOATING: v = 'f'; pf.write(&v, sizeof(char)); break;
-		case BOUNDARY: v = 'b'; pf.write(&v, sizeof(char)); break;
-		case DUMMY: v = 'd'; pf.write(&v, sizeof(char)); break;
-		}
-		ps = (double)_fp->pressure();
-		isf = _fp->IsFreeSurface();
-		//vector3<double> p = _fp->position().To<double>();
-		pf.write((char*)&(_fp->position().To<double>()), sizeof(double) * 3);
-		pf.write((char*)&(_fp->velocity().To<double>()), sizeof(double) * 3);
-		pf.write((char*)&ps, sizeof(double));
-		pf.write((char*)&isf, sizeof(bool));
-// 		bool isv = _fp->IsVisible();
-// 		pf.write((char*)&isv, sizeof(bool));
+		_ptype[i] = _fp->particleType();
+		_pos[i] = _fp->position();
+		_vel[i] = _fp->velocity();
+		_press[i] = _fp->pressure();
+		_fs[i] = _fp->IsFreeSurface();
 	}
+	pf.write((char*)&ct, sizeof(double));
+	pf.write((char*)&np, sizeof(size_t));
+	pf.write((char*)&_ptype, sizeof(tParticle));
+	pf.write((char*)_pos, sizeof(double) * 3 * np);
+	pf.write((char*)_vel, sizeof(double) * 3 * np);
+	pf.write((char*)_press, sizeof(double) * np);
+	pf.write((char*)_fs, sizeof(bool) * np);
 	pf.close();
 	return true;
 }

@@ -20,20 +20,20 @@ public:
 		isph->setDimension(DIM2);
 		isph->setTimeStep(0.1e-3);
 		isph->setStep(100);
-		isph->setEndTime(1);
+		isph->setEndTime(10.0);
 		isph->setProjectionFrom(NONINCREMENTAL, 1);
-		isph->setPPESolver(250, 1e-2);
-		isph->setKernel(QUINTIC, false, 0.00325);
+		isph->setPPESolver(250, 0.1);
+		isph->setKernel(QUINTIC, false, 0.065);
 		//isph->setPeriodicBoundary(PERI_X, 0.0, 0.2);
 		//isph->setKernel(CUBIC_SPLINE, false, 0.013f);
 		isph->setGravity(0.0, -9.80665, 0.0);
 		isph->setParticleShifting(false, 1, 0.01);
-		isph->setDensity(1000.);
-		isph->setViscosity(0.001);
+		isph->setDensity(1);
+		isph->setViscosity(0.01);
 		//isph->setFluidFillLocation(0.01f, 0.6f, 0.f);
-		isph->setFluidFillLocation(0.0, 0.0025, 0.0);
+		isph->setFluidFillLocation(0.0, 0.0, 0.0);
 		//isph->setParticleSpacing(0.01f);
-		isph->setParticleSpacing(0.0025);
+		isph->setParticleSpacing(0.05);
 		//isph->setBoundaryTreatment(GHOST_PARTICLE_METHOD);
 		isph->setBoundaryTreatment(DUMMY_PARTICLE_METHOD);
 		//isph->setCorrection(GRADIENT_CORRECTION);
@@ -42,19 +42,19 @@ public:
 		//fd->setWorldBoundary(VEC3D(-0.5f, -0.1f, 0.0f), VEC3D(3.5f, 2.2f, 0.0f));
 		//fd->setWorldBoundary(VEC3D(-0.1f, -0.1f, 0.0f), VEC3D(1.1f, 1.1f, 0.0f));
 		geo::line *fluid_left = new geo::line(isph, FLUID, "fluid left");
-		fluid_left->define(VEC3D(-0.0025, 0.0, 0.0), VEC3D(-0.0025, 0.1, 0.0), true);
+		fluid_left->define(VEC3D(-0.05, 0.0, 0.0), VEC3D(-0.05, 1.0, 0.0), true);
 
 		geo::line *fluid_right = new geo::line(isph, FLUID, "fluid right");
-		fluid_right->define(VEC3D(0.2, 0.0, 0.0), VEC3D(0.2, 0.1, 0.0), true);
+		fluid_right->define(VEC3D(4.0, 0.0, 0.0), VEC3D(4.0, 1.0, 0.0), true);
 
 		isph->setInitialVelocity(VEC3D(1.0, 0.0, 0.0));
-		isph->setPeriFluidLimitation(0.2);
+		isph->setPeriFluidLimitation(4.0);
 
 		geo::line *top_wall = new geo::line(isph, BOUNDARY, "top_wall");
-		top_wall->define(VEC3D(0.1975, 0.1, 0.0), VEC3D(0.0, 0.1, 0.0), true);
+		top_wall->define(VEC3D(3.95, 1.05, 0.0), VEC3D(0.0, 1.05, 0.0), true);
 
 		geo::line *bottom_wall = new geo::line(isph, BOUNDARY, "bottom_wall");
-		bottom_wall->define(VEC3D(0.0, 0, 0), VEC3D(0.1975, 0, 0), true);
+		bottom_wall->define(VEC3D(0.0, -0.05, 0), VEC3D(3.95, -0.05, 0), true);
 
 //  		geo::line *left_peri = new geo::line(isph, PERI_BOUNDARY, "left peri");
 // 		left_peri->define(VEC3D(-0.01, 0.0975, 0), VEC3D(-0.01, 0.0025, 0.0), false);

@@ -65,6 +65,7 @@ public:
 	void initDummyParticle(size_t id, VEC3D& position, VEC3D& initVel, double hydrop, bool isInnerParticle, bool isf, bool isMov);
 	void setOverlapLine(VEC3D& p1, VEC3D& p2, VEC3D& n1, VEC3D& n2);
 	void setPeriFluidLimitation(double _v) { periFluidLimit = _v; }
+	double getPeriLimit() { return periFluidLimit; }
 	void setInitialVelocity(VEC3D& _initVel) { initVel = _initVel; }
 	//void setPeriodicBoundary(PeriodicDirection _pd, double _pmin, double _pmax);
 	//PeriodicDirection getPeriodicDirection() { return pdirect; }

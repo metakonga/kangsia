@@ -1094,9 +1094,9 @@ void incompressible_sph::correct_by_adding_the_pressure_gradient_term()
 		nv = _fp->auxVelocity() - dt * acci;
 	//	nv = _fp->auxVelocity() + dt*(grav - acci);
 		pos = _fp->position() + dt * nv;
-		if (pos.x > 0.2)
+		if (pos.x > periFluidLimit)
 		{
-			pos.x -= 0.2;
+			pos.x -= periFluidLimit;
 		}
 	//	pos = _fp->position() + dt * 0.5f * (_fp->velocity() + nv);
 		vel = nv;
@@ -1316,8 +1316,9 @@ void incompressible_sph::cpuRun()
 		//updateTimeStep();
 		if (!((cstep) % 100)){
 			tmer.Stop();
-			// 			if (exportData(part++)){
-			std::cout << "| " << std::setw(9) << part - 1 << std::setw(12) << std::fixed << ct << std::setw(10) << eachStep << std::setw(11) << cstep << std::setw(15) << tmer.GetElapsedTimeF() << std::setw(8) << ppe_iter << std::setw(0) << " |" << std::endl;
+			if (exportData(part++)){
+				std::cout << "| " << std::setw(9) << part - 1 << std::setw(12) << std::fixed << ct << std::setw(10) << eachStep << std::setw(11) << cstep << std::setw(15) << tmer.GetElapsedTimeF() << std::setw(8) << ppe_iter << std::setw(0) << " |" << std::endl;
+			}
 			ppe_iter = 0;
 			eachStep = 0;
 			tmer.Start();
@@ -1325,7 +1326,7 @@ void incompressible_sph::cpuRun()
 		}
 		if (!((cstep) % sphydrodynamics::st)){
 			
-			exportParticlePosition(cstep);
+			//exportParticlePosition(cstep);
 			
 		}
 	//	exportParticlePosition();
